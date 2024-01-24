@@ -30,7 +30,7 @@ export class UserService {
     return await this.redis.json.get(handle);
   }
 
-  private async getProblemsByHandle(handle: string) {
+  public async getProblemsByHandle(handle: string) {
     const response = cheerio.load(
       await this.httpService.axiosRef
         .get(`https://www.acmicpc.net/user/${handle}`, {
