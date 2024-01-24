@@ -30,4 +30,11 @@ export class PokerController {
   async get(@Param('id') id: string) {
     return this.pokerService.get(id);
   }
+
+  @Get('calc/:id')
+  @ApiOperation({ summary: '포커 결과 계산' })
+  @ApiParam({ name: 'id', description: '포커 id' })
+  async calc(@Param('id') id: string) {
+    return this.pokerService.calc(id);
+  }
 }
