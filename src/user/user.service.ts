@@ -21,7 +21,7 @@ export class UserService {
   async setUser(handle: string) {
     const problems = await this.getProblemsByHandle(handle);
     await this.redis.json.set(handle, '.', {
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
       problems,
     });
   }
