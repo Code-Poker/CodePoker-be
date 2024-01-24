@@ -16,7 +16,7 @@ describe('PokerService', () => {
     service = module.get<PokerService>(PokerService);
   });
 
-  describe('getPoker', () => {
+  describe('getPokers', () => {
     it('should return {poker}', async () => {
       const result = [
         {
@@ -29,6 +29,20 @@ describe('PokerService', () => {
       jest.spyOn(service, 'getAll').mockImplementation(async () => result);
 
       expect(await service.getAll()).toBe(result);
+    });
+  });
+
+  describe('getPoker', () => {
+    it('should return poker', async () => {
+      const result = {
+        id: 1,
+        name: 'test',
+        updatedAt: '2021-08-01T00:00:00.000Z',
+        participants: [1, 2, 3, 4, 5, 6],
+      };
+      jest.spyOn(service, 'get').mockImplementation(async () => result);
+
+      expect(await service.get('1')).toBe(result);
     });
   });
 });

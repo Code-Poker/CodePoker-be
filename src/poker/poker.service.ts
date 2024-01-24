@@ -53,4 +53,8 @@ export class PokerService {
 
     return pokers;
   }
+
+  async get(id: string) {
+    return await this.redisClient.json.get(id);
+  }
 }

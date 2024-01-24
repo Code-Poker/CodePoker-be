@@ -23,4 +23,11 @@ export class PokerController {
   async getAll() {
     return this.pokerService.getAll();
   }
+
+  @Get('get/:id')
+  @ApiOperation({ summary: '포커 조회' })
+  @ApiParam({ name: 'id', description: '포커 id' })
+  async get(@Param('id') id: string) {
+    return this.pokerService.get(id);
+  }
 }
