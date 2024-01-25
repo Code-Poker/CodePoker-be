@@ -92,7 +92,6 @@ export class UserService {
         }
         url = url.concat('id:' + problems[i] + '|');
       }
-      console.log(url);
 
       const response = await this.httpService.axiosRef
         .get(url)

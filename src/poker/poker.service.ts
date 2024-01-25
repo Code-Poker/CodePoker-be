@@ -84,4 +84,9 @@ export class PokerService {
 
     return result;
   }
+
+  async setRecent(pokerId: string) {
+    await this.redisClient.set('recent', pokerId);
+    return { recent: pokerId };
+  }
 }

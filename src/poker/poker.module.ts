@@ -9,5 +9,6 @@ import { HttpModule } from '@nestjs/axios';
   imports: [DatabaseModule, HttpModule],
   controllers: [PokerController],
   providers: [PokerService, UserService],
+  exports: [PokerService],
 })
 export class PokerModule {}
