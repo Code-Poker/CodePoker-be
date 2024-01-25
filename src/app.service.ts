@@ -16,6 +16,16 @@ export class AppService {
         result: '존재하지 않는 포커입니다.',
       };
     }
-    return await this.pokerService.calc(recentPokerId);
+
+    const result = await this.pokerService.calc(recentPokerId);
+    let resultHtml = `
+    <h1>${result.name} 포커 결과</h1>
+    <h3>${result.createdAt}</h3>`;
+    for (const user in result.result) {
+      resultHtml += `<h2>${user}</h2>`;
+      resultHtml += `<p>${result.result[user]}</p>`;
+    }
+
+    return resultHtml;
   }
 }
