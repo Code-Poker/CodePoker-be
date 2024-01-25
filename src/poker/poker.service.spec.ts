@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PokerService } from './poker.service';
 import { DatabaseModule } from '../database/database.module';
-import { HttpModule } from '@nestjs/axios';
 import { UserService } from '../user/user.service';
+import { HttpModule } from '@nestjs/axios';
 
 describe('PokerService', () => {
   let service: PokerService;

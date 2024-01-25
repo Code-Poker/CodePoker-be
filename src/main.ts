@@ -10,7 +10,7 @@ async function bootstrap() {
     .setTitle('코드포커 API')
     .setVersion('1.0')
     .addTag('Poker', '포커 게임 생성 및 조회')
-    .addTag('User', '사용자 등록 및 점수 조회')
+    .addTag('User', '사용자 점수 조회')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('', app, document);

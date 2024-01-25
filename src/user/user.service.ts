@@ -30,6 +30,33 @@ export class UserService {
     return await this.redis.json.get(handle);
   }
 
+  async calcScore(pokerId: string, handle: string) {
+    const poker = await this.redis.json.get(pokerId);
+    const result = {
+      result: {},
+    };
+
+    if (poker['userInfos'][handle] === undefined) {
+      throw new Error('참가하지 않은 유저입니다.');
+    }
+
+    const point = poker['userInfos'][handle]['point'];
+    const acientProblems = poker['userInfos'][handle]['problems'];
+    const recentProblems = await this.getProblemsByHandle(handle);
+
+    const solved = [];
+    for (const problem of recentProblems) {
+      if (!acientProblems.includes(problem)) {
+        solved.push(problem);
+      }
+    }
+
+    const solvedPoint = await this.calcPointFromSolved(solved);
+    result['result'][handle] = `${solvedPoint} / ${point}`;
+
+    return result;
+  }
+
   public async getProblemsByHandle(handle: string) {
     const response = cheerio.load(
       await this.httpService.axiosRef
@@ -53,5 +80,33 @@ export class UserService {
       .map((problem) => {
         return Number(problem);
       });
+  }
+
+  async calcPointFromSolved(problems: number[]) {
+    let point = 0;
+    for (let page = 1; page <= (problems.length + 49) / 50; page++) {
+      let url = `https://solved.ac/api/v3/search/problem?page=${page}&query=`;
+      for (let i = (page - 1) * 50; i < page * 50; i++) {
+        if (i >= problems.length) {
+          break;
+        }
+        url = url.concat('id:' + problems[i] + '|');
+      }
+      console.log(url);
+
+      const response = await this.httpService.axiosRef
+        .get(url)
+        .then((res) => res.data)
+        .catch((err) => {
+          throw new Error(
+            err?.message + ': ' + JSON.stringify(err?.response?.data),
+          );
+        });
+
+      for (const problem of response['items']) {
+        point += Number(problem['level']);
+      }
+    }
+    return point;
   }
 }

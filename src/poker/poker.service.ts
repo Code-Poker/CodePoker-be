@@ -3,12 +3,10 @@ import { CreatePokerDto } from './dto/create-user.dto';
 import { UserService } from '../user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { RedisClientType } from 'redis';
-import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class PokerService {
   constructor(
-    private readonly httpService: HttpService,
     private readonly userService: UserService,
     @Inject('REDIS') private readonly redisClient: RedisClientType,
   ) {}
@@ -80,39 +78,10 @@ export class PokerService {
         }
       }
 
-      console.log(solved);
-      const solvedPoint = await this.calcPointFromSolved(solved);
+      const solvedPoint = await this.userService.calcPointFromSolved(solved);
       result['result'][userInfo] = `${solvedPoint} / ${point}`;
     }
 
     return result;
-  }
-
-  private async calcPointFromSolved(problems: number[]) {
-    let point = 0;
-    for (let page = 1; page <= (problems.length + 49) / 50; page++) {
-      let url = `https://solved.ac/api/v3/search/problem?page=${page}&query=`;
-      for (let i = (page - 1) * 50; i < page * 50; i++) {
-        if (i >= problems.length) {
-          break;
-        }
-        url = url.concat('id:' + problems[i] + '|');
-      }
-      console.log(url);
-
-      const response = await this.httpService.axiosRef
-        .get(url)
-        .then((res) => res.data)
-        .catch((err) => {
-          throw new Error(
-            err?.message + ': ' + JSON.stringify(err?.response?.data),
-          );
-        });
-
-      for (const problem of response['items']) {
-        point += Number(problem['level']);
-      }
-    }
-    return point;
   }
 }
