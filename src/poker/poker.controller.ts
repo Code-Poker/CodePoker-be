@@ -37,11 +37,4 @@ export class PokerController {
   async calc(@Param('pokerId') pokerId: string) {
     return this.pokerService.calc(pokerId);
   }
-
-  @Post(':pokerId/recent')
-  @ApiOperation({ summary: '최근 포커 설정' })
-  @ApiParam({ name: 'pokerId', description: '포커 id' })
-  async setRecent(@Param('pokerId') pokerId: string) {
-    return this.pokerService.setRecent(pokerId);
-  }
 }

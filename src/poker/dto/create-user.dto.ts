@@ -12,5 +12,5 @@ export class CreatePokerDto {
       lur100: 225,
     },
   })
-  userInfos: { [key: string]: number };
+  participants: { [key: string]: number };
 }

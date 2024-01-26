@@ -17,13 +17,18 @@ export class PokerService {
       id: uuidv4(),
       name,
       createdAt: now,
-      userInfos: {},
+      participants: {},
     };
-    for (const userInfo in createPokerDto.userInfos) {
-      const point = createPokerDto.userInfos[userInfo];
-      poker.userInfos[userInfo] = {
-        point,
-        problems: await this.userService.getProblemsByHandle(userInfo),
+    for (const handle in createPokerDto.participants) {
+      const goal = createPokerDto.participants[handle];
+      const profileImage =
+        await this.userService.getProfileImageFromSolved(handle);
+      const problems = await this.userService.getProblemsFromBoj(handle);
+
+      poker.participants[handle] = {
+        profileImage,
+        goal,
+        problems,
       };
     }
 
@@ -40,8 +45,8 @@ export class PokerService {
       const poker = await this.redisClient.json.get(key);
       const createdAt = poker['createdAt'];
       const participants = [];
-      for (const userInfo in poker['userInfos']) {
-        participants.push(userInfo);
+      for (const handle in poker['participants']) {
+        participants.push(handle);
       }
 
       pokers.push({
@@ -58,36 +63,26 @@ export class PokerService {
     return await this.redisClient.json.get(id);
   }
 
-  async calc(id: string) {
-    const poker = await this.redisClient.json.get(id);
+  async calc(pokerId: string) {
+    const poker = await this.redisClient.json.get(pokerId);
     const result = {
-      id,
+      pokerId,
       name: poker['name'],
       createdAt: poker['createdAt'],
       result: {},
     };
 
-    for (const userInfo in poker['userInfos']) {
-      const point = poker['userInfos'][userInfo]['point'];
-      const acientProblems = poker['userInfos'][userInfo]['problems'];
-      const recentProblems =
-        await this.userService.getProblemsByHandle(userInfo);
-
-      const solved = [];
-      for (const problem of recentProblems) {
-        if (!acientProblems.includes(problem)) {
-          solved.push(problem);
-        }
-      }
-
-      const solvedPoint = await this.userService.calcPointFromSolved(solved);
-      result['result'][userInfo] = `${solvedPoint} / ${point}`;
+    for (const handle in poker['participants']) {
+      result['result'][handle] = await this.userService.calcScore(
+        pokerId,
+        handle,
+      );
     }
 
     return result;
   }
 
-  async setRecent(pokerId: string) {
+  private async setRecent(pokerId: string) {
     await this.redisClient.set('recent', pokerId);
     return { recent: pokerId };
   }

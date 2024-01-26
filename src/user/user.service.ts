@@ -11,38 +11,27 @@ export class UserService {
   ) {}
 
   async getBojInfoByHandle(handle: string) {
-    const problems = await this.getProblemsByHandle(handle);
+    const problems = await this.getProblemsFromBoj(handle);
     return {
       handle,
       problems,
     };
   }
 
-  async setUser(handle: string) {
-    const problems = await this.getProblemsByHandle(handle);
-    await this.redis.json.set(handle, '.', {
-      updatedAt: new Date(),
-      problems,
-    });
-  }
-
-  async getUser(handle: string) {
-    return await this.redis.json.get(handle);
-  }
-
   async calcScore(pokerId: string, handle: string) {
     const poker = await this.redis.json.get(pokerId);
-    const result = {
-      result: {},
-    };
+    if (poker === undefined) {
+      throw new Error('포커가 존재하지 않습니다.');
+    }
 
-    if (poker['userInfos'][handle] === undefined) {
+    if (poker['participants'][handle] === undefined) {
       throw new Error('참가하지 않은 유저입니다.');
     }
 
-    const point = poker['userInfos'][handle]['point'];
-    const acientProblems = poker['userInfos'][handle]['problems'];
-    const recentProblems = await this.getProblemsByHandle(handle);
+    const user = poker['participants'][handle];
+    const goal = user['goal'];
+    const acientProblems = user['problems'];
+    const recentProblems = await this.getProblemsFromBoj(handle);
 
     const solved = [];
     for (const problem of recentProblems) {
@@ -51,13 +40,24 @@ export class UserService {
       }
     }
 
-    const solvedPoint = await this.calcPointFromSolved(solved);
-    result['result'][handle] = `${solvedPoint} / ${point}`;
-
-    return result;
+    const solvedProblems = await this.getProblemsFromSolved(solved);
+    const point = solvedProblems.reduce((acc, cur) => acc + cur['level'], 0);
+    return {
+      handle,
+      profileImage: user['profileImage'],
+      goal,
+      point,
+      problems: solvedProblems.map((problem) => {
+        return {
+          id: problem['problemId'],
+          title: problem['titleKo'],
+          level: problem['level'],
+        };
+      }),
+    };
   }
 
-  public async getProblemsByHandle(handle: string) {
+  public async getProblemsFromBoj(handle: string) {
     const response = cheerio.load(
       await this.httpService.axiosRef
         .get(`https://www.acmicpc.net/user/${handle}`, {
@@ -73,24 +73,24 @@ export class UserService {
         }),
     );
 
-    return response('.panel-body')
+    return response('.col-md-9 > div:nth-child(2) > div:nth-child(2)')
       .text()
       .trim()
       .split(' ')
-      .map((problem) => {
-        return Number(problem);
-      });
+      .map((problem) => parseInt(problem));
   }
 
-  async calcPointFromSolved(problems: number[]) {
-    let point = 0;
-    for (let page = 1; page <= (problems.length + 49) / 50; page++) {
+  async getProblemsFromSolved(problemIds: number[]) {
+    const problems = [];
+
+    for (let page = 1; page <= (problemIds.length + 49) / 50; page++) {
       let url = `https://solved.ac/api/v3/search/problem?page=${page}&query=`;
-      for (let i = (page - 1) * 50; i < page * 50; i++) {
-        if (i >= problems.length) {
-          break;
-        }
-        url = url.concat('id:' + problems[i] + '|');
+      for (
+        let i = (page - 1) * 50;
+        i < page * 50 && i < problemIds.length;
+        i++
+      ) {
+        url = url.concat('id:' + problemIds[i] + '|');
       }
 
       const response = await this.httpService.axiosRef
@@ -103,9 +103,27 @@ export class UserService {
         });
 
       for (const problem of response['items']) {
-        point += Number(problem['level']);
+        problems.push(problem);
       }
     }
-    return point;
+
+    return problems;
+  }
+
+  async getProfileImageFromSolved(handle: string) {
+    const url = `https://solved.ac/api/v3/user/show?handle=${handle}`;
+
+    return (
+      (await this.httpService.axiosRef
+        .get(url)
+        .then((res) => res.data)
+        .catch((err) => {
+          throw new Error(
+            err?.message + ': ' + JSON.stringify(err?.response?.data),
+          );
+        })
+        .then((res) => res['profileImageUrl'])) ??
+      'https://static.solved.ac/misc/default_profile.png'
+    );
   }
 }

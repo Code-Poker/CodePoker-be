@@ -10,21 +10,51 @@ export class AppService {
   ) {}
 
   async getRecentPokerResult() {
-    const recentPokerId = await this.redisClient.get('recent');
-    if (!recentPokerId) {
-      return {
-        result: '존재하지 않는 포커입니다.',
-      };
+    let recentPokerId: string;
+    try {
+      recentPokerId = await this.redisClient.get('recent');
+    } catch (_) {
+      return '최근 포커 결과가 없습니다.';
     }
 
     const result = await this.pokerService.calc(recentPokerId);
     let resultHtml = `
+    <style>
+    img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border-color: black;
+    }
+    </style>
+    
     <h1>${result.name} 포커 결과</h1>
     <h3>${result.createdAt}</h3>`;
-    for (const user in result.result) {
-      resultHtml += `<h2>${user}</h2>`;
-      resultHtml += `<p>${result.result[user]}</p>`;
+    resultHtml += `<table>`;
+    let col = 0;
+    for (const handle in result.result) {
+      if (col === 0) {
+        resultHtml += `<tr>`;
+      }
+      resultHtml += `<td>`;
+      const user = result.result[handle];
+      resultHtml += `<h2><img src="${user.profileImage}" alt="프로필 사진"> ${handle}</h2>`;
+      resultHtml += `<h3>목표: ${user.goal}, 점수: ${user.point}</h3>`;
+      resultHtml += `<h3>문제</h3>`;
+      resultHtml += '<ul>';
+      for (const problem of user.problems) {
+        resultHtml += `<li>${problem.title} (${problem.level})</li>`;
+      }
+      resultHtml += '</ul>';
+      resultHtml += `</td>`;
+      if (col === 2) {
+        resultHtml += `</tr>`;
+        col = 0;
+      } else {
+        col++;
+      }
     }
+    resultHtml += `</table>`;
 
     return resultHtml;
   }

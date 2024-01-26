@@ -30,16 +30,4 @@ describe('UserService', () => {
       expect(await service.getBojInfoByHandle('w8385')).toBe(result);
     });
   });
-
-  describe('getUser', () => {
-    it('should return {handle, problems}', async () => {
-      const result = {
-        updatedAt: '2021-08-01T00:00:00.000Z',
-        problems: [1000, 1001, 1002, 1003, 1004, 1005],
-      };
-      jest.spyOn(service, 'getUser').mockImplementation(async () => result);
-
-      expect(await service.getUser('w8385')).toBe(result);
-    });
-  });
 });
