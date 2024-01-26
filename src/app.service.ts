@@ -20,12 +20,6 @@ export class AppService {
     const result = await this.pokerService.calc(recentPokerId);
     let resultHtml = `
     <style>
-    img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border-color: black;
-    }
     td, th {
       text-align: left;
       vertical-align: top;
@@ -46,7 +40,10 @@ export class AppService {
       }
       resultHtml += `<td>`;
       const user = result.result[handle];
-      resultHtml += `<img src="${user.profileImage}" alt="프로필 사진"> <h2>${handle}</h2>`;
+      if (user.goal <= user.point) {
+        resultHtml += `<img src="https://static.solved.ac/logo.svg" alt="solved.ac" width="50px" style="float: right">`;
+      }
+      resultHtml += `<img src="${user.profileImage}" alt="프로필 사진" width="100px" style="border-radius: 50%; border-color: black"> <h2>${handle}</h2>`;
       resultHtml += `<h3>목표: ${user.goal}, 점수: ${user.point}</h3>`;
       resultHtml += `<details><summary>${user.problems.length} 문제</summary>`;
       resultHtml += '<ul>';
