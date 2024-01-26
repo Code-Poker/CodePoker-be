@@ -9,7 +9,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [
     CacheModule.register({
-      ttl: 60 * 5,
+      ttl: 1000 * 10,
       max: 10,
     }),
     UserModule,
