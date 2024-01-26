@@ -28,11 +28,12 @@ export class PokerService {
     }
 
     await this.redisClient.json.set(poker.id, '.', poker);
+    await this.setRecent(poker.id);
   }
 
   async getAll() {
-    const keys = await this.redisClient.keys('*');
-    keys.filter((key) => key !== 'recent');
+    let keys = await this.redisClient.keys('*');
+    keys = keys.filter((key) => key !== 'recent');
 
     const pokers = [];
     for (const key of keys) {
