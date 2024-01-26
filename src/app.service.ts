@@ -36,7 +36,7 @@ export class AppService {
     }
     </style>
 
-    <h1>${result.name} 포커 결과</h1>
+    <h1>${result.name} 결과</h1>
     <h3>${result.createdAt}</h3>`;
     resultHtml += `<table>`;
     let col = 0;
@@ -46,14 +46,14 @@ export class AppService {
       }
       resultHtml += `<td>`;
       const user = result.result[handle];
-      resultHtml += `<h2><img src="${user.profileImage}" alt="프로필 사진"> ${handle}</h2>`;
+      resultHtml += `<img src="${user.profileImage}" alt="프로필 사진"> <h2>${handle}</h2>`;
       resultHtml += `<h3>목표: ${user.goal}, 점수: ${user.point}</h3>`;
-      resultHtml += `<h3>${user.problems.length} 문제</h3>`;
+      resultHtml += `<details><summary>${user.problems.length} 문제</summary>`;
       resultHtml += '<ul>';
       for (const problem of user.problems) {
         resultHtml += `<li><a href="https://www.acmicpc.net/problem/${problem.id}">${problem.title}</a> (${problem.level})</li>`;
       }
-      resultHtml += '</ul>';
+      resultHtml += '</ul></details>';
       resultHtml += `</td>`;
       if (col === 4) {
         resultHtml += `</tr>`;
