@@ -10,6 +10,11 @@ export class CreatePokerDto {
       eric2057: 340,
       qwerty1120: 105,
       lur100: 225,
+      rkddbswn0: 170,
+      '10ynim': 135,
+      sver0314: 205,
+      minjae5518: 20,
+      oort: 130,
     },
   })
   participants: { [key: string]: number };

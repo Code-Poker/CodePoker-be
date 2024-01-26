@@ -19,6 +19,7 @@ export class PokerService {
       createdAt: now,
       participants: {},
     };
+
     for (const handle in createPokerDto.participants) {
       const goal = createPokerDto.participants[handle];
       const profileImage =
@@ -51,6 +52,7 @@ export class PokerService {
 
       pokers.push({
         id: key,
+        name: poker['name'],
         createdAt,
         participants,
       });

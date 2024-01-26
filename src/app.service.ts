@@ -26,8 +26,16 @@ export class AppService {
       border-radius: 50%;
       border-color: black;
     }
+    td, th {
+      text-align: left;
+      vertical-align: top;
+      border: 1px solid black;
+      padding: 8px;
+      margin: 8px;
+      max-width: 300px;
+    }
     </style>
-    
+
     <h1>${result.name} 포커 결과</h1>
     <h3>${result.createdAt}</h3>`;
     resultHtml += `<table>`;
@@ -43,11 +51,11 @@ export class AppService {
       resultHtml += `<h3>문제</h3>`;
       resultHtml += '<ul>';
       for (const problem of user.problems) {
-        resultHtml += `<li>${problem.title} (${problem.level})</li>`;
+        resultHtml += `<li><a href="https://www.acmicpc.net/problem/${problem.id}">${problem.title}</a> (${problem.level})</li>`;
       }
       resultHtml += '</ul>';
       resultHtml += `</td>`;
-      if (col === 2) {
+      if (col === 4) {
         resultHtml += `</tr>`;
         col = 0;
       } else {
