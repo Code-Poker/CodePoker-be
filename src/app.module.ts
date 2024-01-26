@@ -7,7 +7,15 @@ import { DatabaseModule } from './database/database.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [CacheModule.register(), UserModule, PokerModule, DatabaseModule],
+  imports: [
+    CacheModule.register({
+      ttl: 60 * 5,
+      max: 10,
+    }),
+    UserModule,
+    PokerModule,
+    DatabaseModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
