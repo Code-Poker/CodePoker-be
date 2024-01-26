@@ -84,7 +84,7 @@ export class UserService {
     const problems = [];
 
     for (let page = 1; page <= (problemIds.length + 49) / 50; page++) {
-      let url = `https://solved.ac/api/v3/search/problem?page=${page}&query=`;
+      let url = `https://solved.ac/api/v3/search/problem?query=`;
       for (
         let i = (page - 1) * 50;
         i < page * 50 && i < problemIds.length;
