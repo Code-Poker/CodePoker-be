@@ -48,7 +48,7 @@ export class AppService {
       const user = result.result[handle];
       resultHtml += `<h2><img src="${user.profileImage}" alt="프로필 사진"> ${handle}</h2>`;
       resultHtml += `<h3>목표: ${user.goal}, 점수: ${user.point}</h3>`;
-      resultHtml += `<h3>문제</h3>`;
+      resultHtml += `<h3>${user.problems.length} 문제</h3>`;
       resultHtml += '<ul>';
       for (const problem of user.problems) {
         resultHtml += `<li><a href="https://www.acmicpc.net/problem/${problem.id}">${problem.title}</a> (${problem.level})</li>`;
