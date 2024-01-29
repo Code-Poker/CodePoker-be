@@ -1,23 +1,24 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { RedisClientType } from 'redis';
+import { Injectable } from '@nestjs/common';
 import { PokerService } from './poker/poker.service';
 
 @Injectable()
 export class AppService {
-  constructor(
-    private readonly pokerService: PokerService,
-    @Inject('REDIS') private readonly redisClient: RedisClientType,
-  ) {}
+  constructor(private readonly pokerService: PokerService) {}
 
   async getRecentPokerResult() {
-    let recentPokerId: string;
+    let recentPoker: {
+      pokerId: string;
+      name: string;
+      createdAt: Date;
+      result: { [x: string]: any };
+    };
+
     try {
-      recentPokerId = await this.redisClient.get('recent');
-    } catch (_) {
-      return '최근 포커 결과가 없습니다.';
+      recentPoker = await this.pokerService.getRecent();
+    } catch (error) {
+      return error;
     }
 
-    const result = await this.pokerService.calc(recentPokerId);
     let resultHtml = `
     <style>
     td, th {
@@ -30,16 +31,16 @@ export class AppService {
     }
     </style>
 
-    <h1>${result.name} 결과</h1>
-    <h3>${result.createdAt}</h3>`;
+    <h1>${recentPoker.name} 결과</h1>
+    <h3>${recentPoker.createdAt}</h3>`;
     resultHtml += `<table>`;
     let col = 0;
-    for (const handle in result.result) {
+    for (const handle in recentPoker.result) {
       if (col === 0) {
         resultHtml += `<tr>`;
       }
       resultHtml += `<td>`;
-      const user = result.result[handle];
+      const user = recentPoker.result[handle];
       if (user.goal <= user.point) {
         resultHtml += `<img src="https://static.solved.ac/logo.svg" alt="solved.ac" width="50px" style="float: right">`;
       }

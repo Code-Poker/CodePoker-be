@@ -24,6 +24,12 @@ export class PokerController {
     return this.pokerService.getAll();
   }
 
+  @Get('recent')
+  @ApiOperation({ summary: '최근 포커 결과 조회' })
+  async getRecent() {
+    return this.pokerService.getRecent();
+  }
+
   @Get(':pokerId')
   @ApiOperation({ summary: '포커 조회' })
   @ApiParam({ name: 'pokerId', description: '포커 id' })
