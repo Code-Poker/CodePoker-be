@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreatePokerDto } from './dto/create-user.dto';
+import { CreatePokerDto } from './dto/create-poker.dto';
 import { UserService } from '../user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { RedisClientType } from 'redis';
+import { UpdatePokerDto } from './dto/update-poker.dto';
 
 @Injectable()
 export class PokerService {
@@ -63,6 +64,15 @@ export class PokerService {
 
   async get(id: string) {
     return await this.redisClient.json.get(id);
+  }
+
+  async updateGoal(pokerId: string, updatePokerDto: UpdatePokerDto) {
+    const poker = await this.redisClient.json.get(pokerId);
+    for (const handle in updatePokerDto.participants) {
+      poker['participants'][handle].goal = updatePokerDto.participants[handle];
+    }
+
+    return await this.redisClient.json.set(pokerId, '.', poker);
   }
 
   async calc(pokerId: string) {
