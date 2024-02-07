@@ -77,14 +77,14 @@ export class PokerService {
     const profileImage =
       await this.userService.getProfileImageFromSolved(handle);
     const goal = addParticipantDto.goal;
-    const problems = await this.userService.getProblemsFromBoj(handle);
+    const problems = (await this.userService.getProblemsFromBoj(handle)).filter(
+      (problem) => !addParticipantDto.excludeProblems.includes(problem),
+    );
 
     poker['participants'][handle] = {
       profileImage,
       goal,
-      problems: problems.filter(
-        (problem) => !addParticipantDto.excludeProblems.includes(problem),
-      ),
+      problems: problems,
     };
 
     return await this.redisClient.json.set(pokerId, '.', poker);

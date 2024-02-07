@@ -19,6 +19,10 @@ export class AppService {
       return error;
     }
 
+    const sortedHandles = Object.keys(recentPoker.result).sort((a, b) => {
+      return recentPoker.result[b].point - recentPoker.result[a].point;
+    });
+
     let resultHtml = `
     <style>
     td, th {
@@ -35,7 +39,7 @@ export class AppService {
     <h3>${recentPoker.createdAt}</h3>`;
     resultHtml += `<table>`;
     let col = 0;
-    for (const handle in recentPoker.result) {
+    for (const handle of sortedHandles) {
       if (col === 0) {
         resultHtml += `<tr>`;
       }
