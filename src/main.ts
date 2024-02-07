@@ -9,8 +9,20 @@ async function bootstrap() {
   const options = new DocumentBuilder()
     .setTitle('코드포커 API')
     .setVersion('1.0')
+    .addTag('OAuth', '사용자 인증')
     .addTag('Poker', '포커 게임 생성 및 조회')
     .addTag('User', '사용자 점수 조회')
+    .addOAuth2({
+      type: 'oauth2',
+      flows: {
+        authorizationCode: {
+          authorizationUrl: `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_REST_API_KEY}&redirect_uri=${process.env.KAKAO_REDIRECT_URI}&response_type=code`,
+          scopes: {
+            'create:poker': '포커 생성 권한',
+          },
+        },
+      },
+    })
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
