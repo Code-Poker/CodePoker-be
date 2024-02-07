@@ -3,6 +3,7 @@ import { PokerService } from './poker.service';
 import { CreatePokerDto } from './dto/create-poker.dto';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UpdatePokerDto } from './dto/update-poker.dto';
+import { AppendParticipantDto } from './dto/append-participant.dto';
 
 @Controller('poker')
 @ApiTags('Poker')
@@ -36,6 +37,16 @@ export class PokerController {
   @ApiParam({ name: 'pokerId', description: '포커 id' })
   async get(@Param('pokerId') pokerId: string) {
     return this.pokerService.get(pokerId);
+  }
+
+  @Post(':pokerId/append')
+  @ApiOperation({ summary: '포커 참가자 추가' })
+  @ApiParam({ name: 'pokerId', description: '포커 id' })
+  async appendParticipant(
+    @Param('pokerId') pokerId: string,
+    @Body() appendParticipantDto: AppendParticipantDto,
+  ) {
+    return this.pokerService.appendParticipant(pokerId, appendParticipantDto);
   }
 
   @Patch(':pokerId/goal')

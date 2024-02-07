@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { RedisClientType } from 'redis';
 import { UpdatePokerDto } from './dto/update-poker.dto';
+import { AppendParticipantDto } from './dto/append-participant.dto';
 
 @Injectable()
 export class PokerService {
@@ -65,6 +66,28 @@ export class PokerService {
 
   async get(id: string) {
     return await this.redisClient.json.get(id);
+  }
+
+  async appendParticipant(
+    pokerId: string,
+    addParticipantDto: AppendParticipantDto,
+  ) {
+    const poker = await this.redisClient.json.get(pokerId);
+    const handle = addParticipantDto.handle;
+    const profileImage =
+      await this.userService.getProfileImageFromSolved(handle);
+    const goal = addParticipantDto.goal;
+    const problems = await this.userService.getProblemsFromBoj(handle);
+
+    poker['participants'][handle] = {
+      profileImage,
+      goal,
+      problems: problems.filter(
+        (problem) => !addParticipantDto.excludeProblems.includes(problem),
+      ),
+    };
+
+    return await this.redisClient.json.set(pokerId, '.', poker);
   }
 
   async updateGoal(pokerId: string, updatePokerDto: UpdatePokerDto) {
