@@ -58,6 +58,7 @@ export class PokerService {
         participants,
       });
     }
+    pokers.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
     return pokers;
   }
