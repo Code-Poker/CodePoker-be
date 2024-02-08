@@ -48,7 +48,7 @@ export class AppService {
       if (user.goal <= user.point) {
         resultHtml += `<img src="https://static.solved.ac/logo.svg" alt="solved.ac" width="50px" style="float: right">`;
       }
-      resultHtml += `<img src="${user.profileImage}" alt="프로필 사진" width="100px" style="border-radius: 50%; border-color: black"> <h2>${handle}</h2>`;
+      resultHtml += `<img src="${user.profileImage}" alt="프로필 사진" width="100px" style="border-radius: 50%; border-color: black"> <h2><a href="https://solved.ac/profile/${handle}">${handle}</a></h2>`;
       resultHtml += `<h3>목표: ${user.goal}, 점수: ${user.point}</h3>`;
       resultHtml += `<details><summary>${user.problems.length} 문제</summary>`;
       resultHtml += '<ul>';
