@@ -103,6 +103,7 @@ export class UserService {
         });
 
       for (const problem of response['items']) {
+        problem['level'] = this.levelToPoint(problem['level']);
         problems.push(problem);
       }
     }
@@ -125,5 +126,72 @@ export class UserService {
         .then((res) => res['profileImageUrl'])) ??
       'https://static.solved.ac/misc/default_profile.png'
     );
+  }
+
+  private levelToPoint(level: number) {
+    switch (level) {
+      case 1:
+        return 1;
+      case 2:
+        return 2;
+      case 3:
+        return 3;
+      case 4:
+        return 4;
+      case 5:
+        return 5;
+      case 6:
+        return 7;
+      case 7:
+        return 9;
+      case 8:
+        return 11;
+      case 9:
+        return 13;
+      case 10:
+        return 15;
+      case 11:
+        return 21;
+      case 12:
+        return 27;
+      case 13:
+        return 33;
+      case 14:
+        return 39;
+      case 15:
+        return 45;
+      case 16:
+        return 60;
+      case 17:
+        return 75;
+      case 18:
+        return 90;
+      case 19:
+        return 105;
+      case 20:
+        return 120;
+      case 21:
+        return 159;
+      case 22:
+        return 198;
+      case 23:
+        return 237;
+      case 24:
+        return 276;
+      case 25:
+        return 315;
+      case 26:
+        return 412;
+      case 27:
+        return 509;
+      case 28:
+        return 606;
+      case 29:
+        return 703;
+      case 30:
+        return 800;
+      default:
+        return 0;
+    }
   }
 }
