@@ -100,6 +100,10 @@ export class PokerService {
   }
 
   async calc(pokerId: string) {
+    try {
+      return await this.redisClient.json.get('result_' + pokerId);
+    } catch (_) {}
+
     const poker = await this.redisClient.json.get(pokerId);
     const result = {
       pokerId,
@@ -114,6 +118,9 @@ export class PokerService {
         handle,
       );
     }
+
+    await this.redisClient.json.set('result_' + pokerId, '.', result);
+    await this.redisClient.EXPIRE('result_' + pokerId, 60 * 10);
 
     return result;
   }
