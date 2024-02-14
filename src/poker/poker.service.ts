@@ -42,6 +42,7 @@ export class PokerService {
   async getAll() {
     let keys = await this.redisClient.keys('*');
     keys = keys.filter((key) => key !== 'recent');
+    keys = keys.filter((key) => !key.startsWith('result_'));
 
     const pokers = [];
     for (const key of keys) {
