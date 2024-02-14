@@ -30,12 +30,12 @@ export class UserService {
 
     const user = poker['participants'][handle];
     const goal = user['goal'];
-    const acientProblems = user['problems'];
+    const acientProblems = new Set(user['problems']);
     const recentProblems = await this.getProblemsFromBoj(handle);
 
     const solved = [];
     for (const problem of recentProblems) {
-      if (!acientProblems.includes(problem)) {
+      if (!acientProblems.has(problem)) {
         solved.push(problem);
       }
     }
