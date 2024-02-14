@@ -8,10 +8,6 @@ export class AppService {
   async getRecentPokerResult() {
     const recentPoker = await this.pokerService.getRecent();
 
-    const sortedHandles = Object.keys(recentPoker['result']).sort((a, b) => {
-      return recentPoker['result'][b].point - recentPoker['result'][a].point;
-    });
-
     let resultHtml = `
     <style>
     td, th {
@@ -28,20 +24,19 @@ export class AppService {
     <h3>${recentPoker['createdAt']}</h3>`;
     resultHtml += `<table>`;
     let col = 0;
-    for (const handle of sortedHandles) {
+    for (const participant of recentPoker['result']) {
       if (col === 0) {
         resultHtml += `<tr>`;
       }
       resultHtml += `<td>`;
-      const user = recentPoker['result'][handle];
-      if (user.goal <= user.point) {
+      if (participant['goal'] <= participant['point']) {
         resultHtml += `<img src="https://static.solved.ac/logo.svg" alt="solved.ac" width="50px" style="float: right">`;
       }
-      resultHtml += `<img src="${user.profileImage}" alt="프로필 사진" width="100px" style="border-radius: 50%; border-color: black"> <h2><a href="https://solved.ac/profile/${handle}">${handle}</a></h2>`;
-      resultHtml += `<h3>목표: ${user.goal}, 점수: ${user.point}</h3>`;
-      resultHtml += `<details><summary>${user.problems.length} 문제</summary>`;
+      resultHtml += `<img src="${participant['profileImage']}" alt="프로필 사진" width="100px" style="border-radius: 50%; border-color: black"> <h2><a href="https://solved.ac/profile/${participant['handle']}">${participant['handle']}</a></h2>`;
+      resultHtml += `<h3>목표: ${participant['goal']}, 점수: ${participant['point']}</h3>`;
+      resultHtml += `<details><summary>${participant['problems'].length} 문제</summary>`;
       resultHtml += '<ul>';
-      for (const problem of user.problems) {
+      for (const problem of participant['problems']) {
         resultHtml += `<li><a href="https://www.acmicpc.net/problem/${problem.id}">${problem.title}</a> (${problem.level})</li>`;
       }
       resultHtml += '</ul></details>';

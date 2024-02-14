@@ -114,15 +114,14 @@ export class PokerService {
       pokerId,
       name: poker['name'],
       createdAt: poker['createdAt'],
-      result: {},
+      result: [],
     };
 
     for (const handle in poker['participants']) {
-      result['result'][handle] = await this.userService.calcScore(
-        pokerId,
-        handle,
-      );
+      result.result.push(await this.userService.calcScore(pokerId, handle));
     }
+
+    result.result.sort((a, b) => b.point - a.point);
     await this.redisClient.json.set('result_' + pokerId, '.', result);
   }
 
