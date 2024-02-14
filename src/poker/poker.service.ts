@@ -41,9 +41,11 @@ export class PokerService {
   }
 
   async getAll() {
-    let keys = await this.redisClient.keys('*');
-    keys = keys.filter((key) => key !== 'recent');
-    keys = keys.filter((key) => !key.startsWith('result_'));
+    const keys = await this.redisClient
+      .keys('*')
+      .then((keys) => keys.filter((key) => key !== 'recent'))
+      .then((keys) => keys.filter((key) => key !== 'wellKnownProblems'))
+      .then((keys) => keys.filter((key) => !key.startsWith('result_')));
 
     const pokers = [];
     for (const key of keys) {
@@ -130,13 +132,9 @@ export class PokerService {
   }
 
   async getRecent() {
-    let recentPokerId: string;
-    try {
-      recentPokerId = await this.redisClient.get('recent');
-      return await this.calc(recentPokerId);
-    } catch (error) {
-      return error;
-    }
+    return await this.redisClient.json.get(
+      'result_' + (await this.redisClient.get('recent')),
+    );
   }
 
   private async setRecent(pokerId: string) {

@@ -41,7 +41,10 @@ export class UserService {
     }
 
     const solvedProblems = await this.getProblemsFromSolved(solved);
-    const point = solvedProblems.reduce((acc, cur) => acc + cur['level'], 0);
+    const point = solvedProblems.reduce(
+      (acc, cur) => acc + this.levelToPoint(cur['level']),
+      0,
+    );
     return {
       handle,
       profileImage: user['profileImage'],
@@ -51,7 +54,7 @@ export class UserService {
         return {
           id: problem['problemId'],
           title: problem['titleKo'],
-          level: problem['level'],
+          level: this.levelToPoint(problem['level']),
         };
       }),
     };
@@ -82,15 +85,25 @@ export class UserService {
 
   async getProblemsFromSolved(problemIds: number[]) {
     const problems = [];
+    const notKnownProblemsIds = [];
 
-    for (let page = 1; page <= (problemIds.length + 49) / 50; page++) {
+    const wellKnownJson = await this.redis.json.get('wellKnownProblems');
+    for (const problemId of problemIds) {
+      if (wellKnownJson[problemId] !== undefined) {
+        problems.push(wellKnownJson[problemId]);
+      } else {
+        notKnownProblemsIds.push(problemId);
+      }
+    }
+
+    for (let page = 1; page <= (notKnownProblemsIds.length + 49) / 50; page++) {
       let url = `https://solved.ac/api/v3/search/problem?query=`;
       for (
         let i = (page - 1) * 50;
-        i < page * 50 && i < problemIds.length;
+        i < page * 50 && i < notKnownProblemsIds.length;
         i++
       ) {
-        url = url.concat('id:' + problemIds[i] + '|');
+        url = url.concat('id:' + notKnownProblemsIds[i] + '|');
       }
 
       const response = await this.httpService.axiosRef
@@ -103,11 +116,13 @@ export class UserService {
         });
 
       for (const problem of response['items']) {
-        problem['level'] = this.levelToPoint(problem['level']);
+        wellKnownJson[problem['problemId']] = problem;
         problems.push(problem);
       }
     }
 
+    await this.redis.json.set('wellKnownProblems', '.', wellKnownJson);
+    problems.sort((a, b) => a['problemId'] - b['problemId']);
     return problems;
   }
 

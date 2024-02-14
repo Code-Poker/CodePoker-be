@@ -6,21 +6,10 @@ export class AppService {
   constructor(private readonly pokerService: PokerService) {}
 
   async getRecentPokerResult() {
-    let recentPoker: {
-      pokerId: string;
-      name: string;
-      createdAt: Date;
-      result: { [x: string]: any };
-    };
+    const recentPoker = await this.pokerService.getRecent();
 
-    try {
-      recentPoker = await this.pokerService.getRecent();
-    } catch (error) {
-      return error;
-    }
-
-    const sortedHandles = Object.keys(recentPoker.result).sort((a, b) => {
-      return recentPoker.result[b].point - recentPoker.result[a].point;
+    const sortedHandles = Object.keys(recentPoker['result']).sort((a, b) => {
+      return recentPoker['result'][b].point - recentPoker['result'][a].point;
     });
 
     let resultHtml = `
@@ -35,8 +24,8 @@ export class AppService {
     }
     </style>
 
-    <h1>${recentPoker.name} 결과</h1>
-    <h3>${recentPoker.createdAt}</h3>`;
+    <h1>${recentPoker['name']} 결과</h1>
+    <h3>${recentPoker['createdAt']}</h3>`;
     resultHtml += `<table>`;
     let col = 0;
     for (const handle of sortedHandles) {
@@ -44,7 +33,7 @@ export class AppService {
         resultHtml += `<tr>`;
       }
       resultHtml += `<td>`;
-      const user = recentPoker.result[handle];
+      const user = recentPoker['result'][handle];
       if (user.goal <= user.point) {
         resultHtml += `<img src="https://static.solved.ac/logo.svg" alt="solved.ac" width="50px" style="float: right">`;
       }
