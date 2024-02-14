@@ -59,13 +59,6 @@ export class PokerController {
     return this.pokerService.updateGoal(pokerId, updatePokerDto);
   }
 
-  @Get(':pokerId/calc')
-  @ApiOperation({ summary: '포커 결과 계산' })
-  @ApiParam({ name: 'pokerId', description: '포커 id' })
-  async calc(@Param('pokerId') pokerId: string) {
-    return this.pokerService.calc(pokerId);
-  }
-
   @Get(':pokerId/refresh')
   @ApiOperation({ summary: '포커 결과 갱신' })
   @ApiParam({ name: 'pokerId', description: '포커 id' })

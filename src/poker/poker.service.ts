@@ -103,11 +103,6 @@ export class PokerService {
     return await this.redisClient.json.set(pokerId, '.', poker);
   }
 
-  async calc(pokerId: string) {
-    await this.refresh(pokerId);
-    return await this.redisClient.json.get('result_' + pokerId);
-  }
-
   @Cron(CronExpression.EVERY_5_MINUTES)
   async refreshRecent() {
     await this.refresh(await this.redisClient.get('recent'));
