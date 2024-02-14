@@ -65,4 +65,11 @@ export class PokerController {
   async calc(@Param('pokerId') pokerId: string) {
     return this.pokerService.calc(pokerId);
   }
+
+  @Get(':pokerId/refresh')
+  @ApiOperation({ summary: '포커 결과 갱신' })
+  @ApiParam({ name: 'pokerId', description: '포커 id' })
+  async refresh(@Param('pokerId') pokerId: string) {
+    return this.pokerService.refresh(pokerId);
+  }
 }

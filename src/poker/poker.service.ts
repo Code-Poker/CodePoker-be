@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RedisClientType } from 'redis';
 import { UpdatePokerDto } from './dto/update-poker.dto';
 import { AppendParticipantDto } from './dto/append-participant.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class PokerService {
@@ -101,11 +102,16 @@ export class PokerService {
   }
 
   async calc(pokerId: string) {
-    const lastResult = await this.redisClient.json.get('result_' + pokerId);
-    if (lastResult !== null) {
-      return lastResult;
-    }
+    await this.refresh(pokerId);
+    return await this.redisClient.json.get('result_' + pokerId);
+  }
 
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async refreshRecent() {
+    await this.refresh(await this.redisClient.get('recent'));
+  }
+
+  async refresh(pokerId: string) {
     const poker = await this.redisClient.json.get(pokerId);
     const result = {
       pokerId,
@@ -120,11 +126,7 @@ export class PokerService {
         handle,
       );
     }
-
     await this.redisClient.json.set('result_' + pokerId, '.', result);
-    await this.redisClient.EXPIRE('result_' + pokerId, 60 * 10);
-
-    return result;
   }
 
   async getRecent() {
