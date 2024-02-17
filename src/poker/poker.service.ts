@@ -69,7 +69,7 @@ export class PokerService {
   }
 
   async get(id: string) {
-    return await this.redisClient.json.get(id);
+    return await this.redisClient.json.get('result_' + id);
   }
 
   async appendParticipant(
