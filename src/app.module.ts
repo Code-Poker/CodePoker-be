@@ -6,6 +6,7 @@ import { PokerModule } from './poker/poker.module';
 import { DatabaseModule } from './database/database.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { OauthModule } from './oauth/oauth.module';
+import { ProblemModule } from './problem/problem.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { OauthModule } from './oauth/oauth.module';
     PokerModule,
     DatabaseModule,
     OauthModule,
+    ProblemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

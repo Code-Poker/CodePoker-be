@@ -11,6 +11,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('OAuth', '사용자 인증')
     .addTag('Poker', '포커 게임 생성 및 조회')
+    .addTag('Problem', '문제 데이터 관리')
     .addOAuth2({
       type: 'oauth2',
       flows: {
