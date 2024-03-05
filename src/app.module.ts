@@ -18,7 +18,5 @@ import { ProblemModule } from './problem/problem.module';
     OauthModule,
     ProblemModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
