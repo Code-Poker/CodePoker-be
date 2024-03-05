@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
@@ -16,25 +16,25 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [ 18.x ]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - name: Generate Environment Variables File for Production
-      run: |
-        echo "REDIS_HOST=$REDIS_HOST" >> .env
-        echo "REDIS_PORT=$REDIS_PORT" >> .env
-        echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> .env
-      env:
-        REDIS_HOST: ${{ secrets.REDIS_HOST }}
-        REDIS_PORT: ${{ secrets.REDIS_PORT }}
-        REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Generate Environment Variables File for Production
+        run: |
+          echo "REDIS_HOST=$REDIS_HOST" >> .env
+          echo "REDIS_PORT=$REDIS_PORT" >> .env
+          echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> .env
+        env:
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
