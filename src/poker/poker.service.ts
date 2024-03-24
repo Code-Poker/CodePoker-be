@@ -21,23 +21,23 @@ export class PokerService {
       name,
       createdAt: now,
       participants: {},
+      tasks: createPokerDto.tasks,
     };
 
     for (const handle in createPokerDto.participants) {
-      const goal = createPokerDto.participants[handle];
       const profileImage =
         await this.userService.getProfileImageFromSolved(handle);
       const problems = await this.userService.getProblemsFromBoj(handle);
 
       poker.participants[handle] = {
         profileImage,
-        goal,
         problems,
       };
     }
 
     await this.redisClient.json.set(poker.id, '.', poker);
     await this.setRecent(poker.id);
+    await this.refresh(poker.id);
   }
 
   async getAll() {
@@ -80,14 +80,12 @@ export class PokerService {
     const handle = addParticipantDto.handle;
     const profileImage =
       await this.userService.getProfileImageFromSolved(handle);
-    const goal = addParticipantDto.goal;
     const problems = (await this.userService.getProblemsFromBoj(handle)).filter(
       (problem) => !addParticipantDto.excludeProblems.includes(problem),
     );
 
     poker['participants'][handle] = {
       profileImage,
-      goal,
       problems: problems,
     };
 
@@ -114,6 +112,7 @@ export class PokerService {
       pokerId,
       name: poker['name'],
       createdAt: poker['createdAt'],
+      tasks: poker['tasks'],
       result: [],
     };
 

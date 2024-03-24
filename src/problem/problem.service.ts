@@ -22,4 +22,16 @@ export class ProblemService {
     const url = `https://solved.ac/api/v3/problem/show?problemId=${problemId}`;
     return await this.httpService.axiosRef.get(url).then((res) => res.data);
   }
+
+  async getIdsByQuery(query: string) {
+    const url = `https://solved.ac/api/v3/search/problem?query=${query}`;
+    return await this.httpService.axiosRef
+      .get(url)
+      .then((res) => res.data)
+      .then((data) =>
+        data['items'].map(
+          (problem: { [x: string]: any }) => problem['problemId'],
+        ),
+      );
+  }
 }
