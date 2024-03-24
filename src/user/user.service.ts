@@ -55,7 +55,15 @@ export class UserService {
       handle,
       profileImage: user['profileImage'],
       point,
-      solvedTasks,
+      tasks: await this.getProblemsFromSolved(solvedTasks).then((problems) =>
+        problems.map((problem) => {
+          return {
+            id: problem['problemId'],
+            title: problem['titleKo'],
+            level: this.levelToPoint(problem['level']),
+          };
+        }),
+      ),
       problems: solvedProblems.map((problem) => {
         return {
           id: problem['problemId'],
