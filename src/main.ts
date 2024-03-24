@@ -25,10 +25,10 @@ async function bootstrap() {
     })
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api', app, document);
-  await app.listen(6370);
+  SwaggerModule.setup('', app, document);
+  await app.listen(6371);
 }
 
 bootstrap().then(() => {
-  console.log('Server is running on http://localhost:6370');
+  console.log('Server is running on http://localhost:6371');
 });
