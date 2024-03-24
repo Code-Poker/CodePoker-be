@@ -59,7 +59,7 @@ export class PokerController {
     return this.pokerService.updateGoal(pokerId, updatePokerDto);
   }
 
-  @Get(':pokerId/refresh')
+  @Patch(':pokerId/refresh')
   @ApiOperation({ summary: '포커 결과 갱신' })
   @ApiParam({ name: 'pokerId', description: '포커 id' })
   async refresh(@Param('pokerId') pokerId: string) {

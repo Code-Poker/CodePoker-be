@@ -120,7 +120,12 @@ export class PokerService {
       result.result.push(await this.userService.calcScore(pokerId, handle));
     }
 
-    result.result.sort((a, b) => b.point - a.point);
+    result.result.sort((a, b) => {
+      if (a.tasks.length === b.tasks.length) {
+        return b.score - a.score;
+      }
+      return b.tasks.length - a.tasks.length;
+    });
     await this.redisClient.json.set('result_' + pokerId, '.', result);
   }
 
