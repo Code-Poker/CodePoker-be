@@ -24,20 +24,19 @@ export class PokerService {
     };
 
     for (const handle in createPokerDto.participants) {
-      const goal = createPokerDto.participants[handle];
       const profileImage =
         await this.userService.getProfileImageFromSolved(handle);
       const problems = await this.userService.getProblemsFromBoj(handle);
 
       poker.participants[handle] = {
         profileImage,
-        goal,
         problems,
       };
     }
 
     await this.redisClient.json.set(poker.id, '.', poker);
     await this.setRecent(poker.id);
+    await this.refresh(poker.id);
   }
 
   async getAll() {
