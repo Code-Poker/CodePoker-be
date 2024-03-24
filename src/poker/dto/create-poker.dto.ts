@@ -32,5 +32,5 @@ export class CreatePokerDto {
       14681, 15552, 15964, 25083, 27866,
     ],
   })
-  tasks: string[];
+  tasks: number[];
 }

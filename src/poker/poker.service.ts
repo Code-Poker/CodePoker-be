@@ -24,7 +24,7 @@ export class PokerService {
       tasks: createPokerDto.tasks,
     };
 
-    for (const handle in createPokerDto.participants) {
+    for (const handle of createPokerDto.participants) {
       const profileImage =
         await this.userService.getProfileImageFromSolved(handle);
       const problems = await this.userService.getProblemsFromBoj(handle);
