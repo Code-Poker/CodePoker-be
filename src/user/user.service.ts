@@ -64,6 +64,7 @@ export class UserService {
           };
         }),
       ),
+      tasksDone: solvedTasks.length === tasks.length,
       problems: solvedProblems.map((problem) => {
         return {
           id: problem['problemId'],
