@@ -29,7 +29,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^4.0.1",
     "@nestjs/swagger": "^7.2.0",
-    "@trivago/prettier-plugin-sort-imports": "^2.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "axios": "^1.6.5",
     "cache-manager": "^5.4.0",
     "cheerio": "^1.0.0-rc.12",
