@@ -1,11 +1,13 @@
-import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
-import { PokerModule } from './poker/poker.module';
-import { DatabaseModule } from './database/database.module';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
-import { OauthModule } from './oauth/oauth.module';
-import { ProblemModule } from './problem/problem.module';
+import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+
+import { DatabaseModule } from './database/database.module';
+import { GroupModule } from './group/group.module';
+import { PokerModule } from './poker/poker.module';
+import { ProblemModule } from './problem/problem.module';
+import { SsuModule } from './ssu/ssu.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -16,8 +18,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     UserModule,
     PokerModule,
     DatabaseModule,
-    OauthModule,
     ProblemModule,
+    SsuModule,
+    GroupModule,
   ],
   providers: [
     {

@@ -20,5 +20,5 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd PS-be/
-            npm install
             git pull
+            npm install

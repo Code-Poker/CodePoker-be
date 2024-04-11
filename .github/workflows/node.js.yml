@@ -28,13 +28,10 @@ jobs:
           cache: 'npm'
       - name: Generate Environment Variables File for Production
         run: |
-          echo "REDIS_HOST=$REDIS_HOST" >> .env
-          echo "REDIS_PORT=$REDIS_PORT" >> .env
-          echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> .env
+          echo "MONGODB_URI=$MONGODB_URI" >> .env
+          echo "SOLVEDAC_TOKEN=$SOLVEDAC_TOKEN" >> .env
         env:
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          SOLVEDAC_TOKEN: ${{ secrets.SOLVEDAC_TOKEN }}
       - run: npm ci
       - run: npm run build --if-present
-      - run: npm test

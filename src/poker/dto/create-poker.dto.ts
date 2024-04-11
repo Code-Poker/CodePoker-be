@@ -1,36 +1,46 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsMongoId } from 'class-validator';
 
 export class CreatePokerDto {
+  @IsMongoId()
   @ApiProperty({
-    description: '게임에 참여하는 사람들의 핸들 목록',
-    default: [
-      'effectus60',
-      'mseo2004',
-      'jmin2649',
-      'tgkim12',
-      'hongki13',
-      'ehdals110',
-      'sjyshos12',
-      'philbae',
-      'onekyul02',
-      'yooonman',
-      'ssssssss2345',
-      'mannie',
-      'saripi',
-      'cj8hu9',
-      '0608hsh',
-    ],
+    description: '그룹 ID',
+    example: '66102e3152abeb7ea1ca7a78',
   })
-  participants: string[];
+  groupId: string;
 
   @ApiProperty({
-    description: '과제 목록',
+    description: '게임에 참여하는 사람들의 목록',
     default: [
-      1000, 1001, 1008, 1330, 2420, 2438, 2475, 2557, 2738, 2739, 2741, 2743,
-      2744, 2753, 2754, 5597, 7287, 9086, 9498, 10171, 10172, 10699, 10807,
-      10869, 10871, 10872, 10950, 10951, 10952, 10998, 11382, 11654, 11718,
-      14681, 15552, 15964, 25083, 27866,
+      {
+        handle: 'w8385',
+        goal: 8385,
+      },
+      {
+        handle: 'm4ushold',
+        goal: 10000,
+      },
+      {
+        handle: 'qwerty1120',
+        goal: 1120,
+      },
     ],
   })
+  participants: {
+    handle: string;
+    goal: number;
+  }[];
+
+  @ApiProperty({
+    required: false,
+    description: '과제 목록',
+    default: [],
+  })
   tasks: number[];
+
+  @ApiProperty({
+    description: '결과 정산 날짜',
+    default: new Date(),
+  })
+  endDate: Date;
 }

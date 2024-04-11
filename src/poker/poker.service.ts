@@ -1,142 +1,162 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CreatePokerDto } from './dto/create-poker.dto';
-import { UserService } from '../user/user.service';
-import { v4 as uuidv4 } from 'uuid';
-import { RedisClientType } from 'redis';
-import { UpdatePokerDto } from './dto/update-poker.dto';
-import { AppendParticipantDto } from './dto/append-participant.dto';
+import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+
+import { GroupRepository } from '../group/group.repository';
+import { ProblemService } from '../problem/problem.service';
+import { UserService } from '../user/user.service';
+import { CreatePokerDto } from './dto/create-poker.dto';
+import { Poker } from './entities/poker.entity';
+import { PokerRepository } from './poker.repository';
 
 @Injectable()
 export class PokerService {
   constructor(
     private readonly userService: UserService,
-    @Inject('REDIS') private readonly redisClient: RedisClientType,
+    private readonly problemService: ProblemService,
+    private readonly pokerRepository: PokerRepository,
+    private readonly groupRepository: GroupRepository,
   ) {}
 
-  async create(name: string, createPokerDto: CreatePokerDto) {
-    const now = new Date().toString();
-    const poker = {
-      id: uuidv4(),
+  async create(name: string, createPokerDto: CreatePokerDto): Promise<Poker> {
+    const group = await this.groupRepository.get(createPokerDto.groupId);
+    this.groupRepository.validate(createPokerDto.groupId, group);
+
+    const poker: Poker = {
+      id: undefined,
       name,
-      createdAt: now,
-      participants: {},
+      participants: [],
       tasks: createPokerDto.tasks,
+      startDate: new Date(),
+      endDate: createPokerDto.endDate,
     };
 
-    for (const handle of createPokerDto.participants) {
+    const res: Poker = {
+      id: undefined,
+      name,
+      participants: [],
+      tasks: createPokerDto.tasks,
+      startDate: new Date(),
+      endDate: createPokerDto.endDate,
+    };
+
+    for (const participant of createPokerDto.participants) {
+      const handle = participant.handle;
+      const goal = participant.goal;
       const profileImage =
         await this.userService.getProfileImageFromSolved(handle);
-      const problems = await this.userService.getProblemsFromBoj(handle);
 
-      poker.participants[handle] = {
+      const snapshot = await this.userService.getProblemsFromBoj(handle);
+      poker.participants.push({
+        handle,
         profileImage,
-        problems,
-      };
-    }
+        snapshot,
+        point: 0,
 
-    await this.redisClient.json.set(poker.id, '.', poker);
-    await this.setRecent(poker.id);
-    await this.refresh(poker.id);
-  }
+        goal,
+        tasksDone: null,
+        result: null,
+      });
 
-  async getAll() {
-    const keys = await this.redisClient
-      .keys('*')
-      .then((keys) => keys.filter((key) => key !== 'recent'))
-      .then((keys) => keys.filter((key) => key !== 'wellKnownProblems'))
-      .then((keys) => keys.filter((key) => !key.startsWith('result_')));
+      res.participants.push({
+        handle,
+        profileImage,
+        snapshot: [],
+        point: 0,
 
-    const pokers = [];
-    for (const key of keys) {
-      const poker = await this.redisClient.json.get(key);
-      const createdAt = poker['createdAt'];
-      const participants = [];
-      for (const handle in poker['participants']) {
-        participants.push(handle);
-      }
-
-      pokers.push({
-        id: key,
-        name: poker['name'],
-        createdAt,
-        participants,
+        goal,
+        tasksDone: null,
+        result: null,
       });
     }
-    pokers.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
+    const createdPoker = await this.pokerRepository.create(poker);
+    const pokerId = createdPoker.id;
+    group.pokers.push(pokerId);
+    await this.groupRepository.update(createPokerDto.groupId, group);
+
+    res.id = pokerId;
+    return res;
+  }
+
+  async getAll(): Promise<Poker[]> {
+    const pokers = (await this.pokerRepository.getAll()) as Poker[];
+    for (const poker of pokers) {
+      for (const participant in poker.participants) {
+        const { handle, profileImage, goal, point, tasksDone } =
+          poker.participants[participant];
+        poker.participants[participant] = {
+          handle,
+          profileImage,
+          goal,
+          point,
+          tasksDone,
+          snapshot: [],
+          result: [],
+        };
+      }
+    }
     return pokers;
   }
 
   async get(id: string) {
-    return await this.redisClient.json.get('result_' + id);
-  }
-
-  async appendParticipant(
-    pokerId: string,
-    addParticipantDto: AppendParticipantDto,
-  ) {
-    const poker = await this.redisClient.json.get(pokerId);
-    const handle = addParticipantDto.handle;
-    const profileImage =
-      await this.userService.getProfileImageFromSolved(handle);
-    const problems = (await this.userService.getProblemsFromBoj(handle)).filter(
-      (problem) => !addParticipantDto.excludeProblems.includes(problem),
-    );
-
-    poker['participants'][handle] = {
-      profileImage,
-      problems: problems,
-    };
-
-    return await this.redisClient.json.set(pokerId, '.', poker);
-  }
-
-  async updateGoal(pokerId: string, updatePokerDto: UpdatePokerDto) {
-    const poker = await this.redisClient.json.get(pokerId);
-    for (const handle in updatePokerDto.participants) {
-      poker['participants'][handle].goal = updatePokerDto.participants[handle];
+    const createdPoker = (await this.pokerRepository.get(id)) as any;
+    for (const participant of createdPoker.participants) {
+      participant.snapshot = [];
     }
-
-    return await this.redisClient.json.set(pokerId, '.', poker);
+    return createdPoker;
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async refreshRecent() {
-    await this.refresh(await this.redisClient.get('recent'));
+    const pokers = (await this.pokerRepository.getAll()) as Poker[];
+    for (const poker of pokers) {
+      if (poker.endDate < new Date()) {
+        continue;
+      }
+      await this.refresh(poker.id);
+    }
   }
 
   async refresh(pokerId: string) {
-    const poker = await this.redisClient.json.get(pokerId);
-    const result = {
-      pokerId,
-      name: poker['name'],
-      createdAt: poker['createdAt'],
-      tasks: poker['tasks'],
-      result: [],
-    };
+    const poker = (await this.pokerRepository.get(pokerId)) as Poker;
+    this.pokerRepository.validate(pokerId, poker);
 
-    for (const handle in poker['participants']) {
-      result.result.push(await this.userService.calcScore(pokerId, handle));
+    for (const participant of poker.participants) {
+      const snapshot = participant.snapshot;
+      const present = await this.userService.getProblemsFromBoj(
+        participant.handle,
+      );
+
+      const solved = [];
+      for (const problem of present) {
+        if (!snapshot.includes(problem)) {
+          solved.push(problem);
+        }
+      }
+
+      const solvedProblems =
+        await this.problemService.getProblemsFromSolved(solved);
+      participant.point = solvedProblems.reduce(
+        (acc, cur) => acc + this.userService.levelToPoint(cur.level),
+        0,
+      );
+
+      participant.result = solvedProblems.map((problem) => {
+        return {
+          problemId: problem.problemId,
+          titleKo: problem.titleKo,
+          level: this.userService.levelToPoint(problem.level),
+        };
+      });
     }
 
-    result.result.sort((a, b) => {
-      if (a.tasks.length === b.tasks.length) {
-        return b.score - a.score;
-      }
-      return b.tasks.length - a.tasks.length;
+    poker.participants.sort((a, b) => {
+      return b.point - a.point;
     });
-    await this.redisClient.json.set('result_' + pokerId, '.', result);
+    this.pokerRepository.update(pokerId, poker);
   }
 
-  async getRecent() {
-    return await this.redisClient.json.get(
-      'result_' + (await this.redisClient.get('recent')),
-    );
-  }
-
-  private async setRecent(pokerId: string) {
-    await this.redisClient.set('recent', pokerId);
-    return { recent: pokerId };
+  async deleteAll() {
+    return this.pokerRepository.deleteAll();
   }
 }
