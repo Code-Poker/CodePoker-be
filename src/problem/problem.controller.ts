@@ -1,14 +1,15 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ProblemService } from './problem.service';
+import { Controller } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+
+import { ProblemService } from './problem.service';
 
 @ApiTags('Problem')
 @Controller('problem')
 export class ProblemController {
   constructor(private readonly problemService: ProblemService) {}
 
-  @Get(':problemId/refresh')
-  async refresh(@Param('problemId') problemId: string) {
-    return this.problemService.refresh(problemId);
-  }
+  // @Get(':problemId/refresh')
+  // async refresh(@Param('problemId') problemId: string) {
+  //   return this.problemService.refresh(problemId);
+  // }
 }

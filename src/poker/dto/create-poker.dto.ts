@@ -1,21 +1,46 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsMongoId } from 'class-validator';
 
 export class CreatePokerDto {
+  @IsMongoId()
   @ApiProperty({
-    description: '게임에 참여하는 사람들의 핸들 목록과 목표 점수',
-    default: {
-      m4ushold: 250,
-      rkaskan506: 180,
-      w8385: 180,
-      eric2057: 340,
-      qwerty1120: 105,
-      lur100: 225,
-      rkddbswn0: 170,
-      '10ynim': 135,
-      sver0314: 205,
-      minjae5518: 20,
-      oort: 130,
-    },
+    description: '그룹 ID',
+    example: '66102e3152abeb7ea1ca7a78',
   })
-  participants: { [key: string]: number };
+  groupId: string;
+
+  @ApiProperty({
+    description: '게임에 참여하는 사람들의 목록',
+    default: [
+      {
+        handle: 'w8385',
+        goal: 8385,
+      },
+      {
+        handle: 'm4ushold',
+        goal: 10000,
+      },
+      {
+        handle: 'qwerty1120',
+        goal: 1120,
+      },
+    ],
+  })
+  participants: {
+    handle: string;
+    goal: number;
+  }[];
+
+  @ApiProperty({
+    required: false,
+    description: '과제 목록',
+    default: [],
+  })
+  tasks: number[];
+
+  @ApiProperty({
+    description: '결과 정산 날짜',
+    default: new Date(),
+  })
+  endDate: Date;
 }

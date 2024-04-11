@@ -19,6 +19,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd CodePoker-be/
-            npm install
+            cd PS-be/
             git pull
+            npm install

@@ -1,18 +1,9 @@
-import { createClient } from 'redis';
+import * as mongoose from 'mongoose';
 
 export const databaseProviders = [
   {
-    provide: 'REDIS',
-    useFactory: async () => {
-      const client = createClient({
-        socket: {
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT),
-        },
-        password: process.env.REDIS_PASSWORD,
-      });
-      await client.connect();
-      return client;
-    },
+    provide: 'MONGODB',
+    useFactory: (): Promise<typeof mongoose> =>
+      mongoose.connect(process.env.MONGODB_URI),
   },
 ];
