@@ -3,7 +3,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { GroupModule } from './group/group.module';
 import { PokerModule } from './poker/poker.module';
-import { ProblemModule } from './problem/problem.module';
 import { SsuModule } from './ssu/ssu.module';
 
 export const configCodePoker = (app: INestApplication<any>) => {
@@ -15,9 +14,9 @@ export const configCodePoker = (app: INestApplication<any>) => {
     .addTag('Problem', '문제 데이터 관리')
     .build();
   const document = SwaggerModule.createDocument(app, options, {
-    include: [GroupModule, PokerModule, ProblemModule],
+    include: [GroupModule, PokerModule],
   });
-  SwaggerModule.setup('', app, document);
+  SwaggerModule.setup('api', app, document);
 };
 
 export const configSSUJoon = (app: INestApplication<any>) => {

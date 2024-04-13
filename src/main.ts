@@ -1,10 +1,10 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import * as process from 'node:process';
 
 import { AppModule } from './app.module';
 import { configCodePoker, configSSUJoon } from './config.swagger';
 import { HttpExceptionFilter } from './http-exception.filter';
-import * as process from 'node:process';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
