@@ -21,12 +21,6 @@ export class SsuController {
   })
   @ApiQuery({
     required: false,
-    name: 'direction',
-    description: '정렬 방향',
-    enum: ['asc', 'desc'],
-  })
-  @ApiQuery({
-    required: false,
     name: 'page',
     description: '페이지 번호',
   })
@@ -36,13 +30,19 @@ export class SsuController {
     description: '정렬 기준',
     enum: ['id', 'level', 'title', 'solved', 'average_try', 'random'],
   })
+  @ApiQuery({
+    required: false,
+    name: 'direction',
+    description: '정렬 방향',
+    enum: ['asc', 'desc'],
+  })
   async solvedProblems(
-    @Query('solved') solved: boolean = true,
-    @Query('direction') direction: string = 'asc',
-    @Query('page') page: number = 1,
-    @Query('sort') sort: string = 'id',
+    @Query('solved') solved: string = 'true',
+    @Query('page') page: number,
+    @Query('sort') sort: string,
+    @Query('direction') direction: string,
   ) {
-    return this.ssuService.solvedProblems(solved, direction, page, sort);
+    return this.ssuService.solvedProblems(solved, page, sort, direction);
   }
 
   @Get('ranking/solved')

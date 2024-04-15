@@ -59,30 +59,26 @@ export class SsuService {
   }
 
   async solvedProblems(
-    solved: boolean,
-    direction: string,
+    solved: string,
     page: number,
     sort: string,
+    direction: string,
   ) {
     const url = `https://solved.ac/api/v3/search/problem`;
+    const query = solved === 'true' ? 'o@ssu' : '!o@ssu';
     return await this.httpService.axiosRef
       .get(url, {
         params: {
-          query: solved ? 'o@ssu' : '!o@ssu',
-          direction,
+          query,
           page,
           sort,
+          direction,
         },
         headers: {
           Cookie: this.configService.get<string>('SOLVEDAC_TOKEN'),
         },
       })
-      .then((res) => res.data)
-      .then((data) =>
-        data['items'].map(
-          (problem: { [x: string]: any }) => problem['problemId'],
-        ),
-      );
+      .then((res) => res.data);
   }
 
   async solvedRanking(page: number) {
