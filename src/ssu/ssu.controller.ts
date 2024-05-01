@@ -15,9 +15,10 @@ export class SsuController {
 
   @Get('solvedProblems')
   @ApiQuery({
-    required: false,
+    required: true,
     name: 'solved',
     description: '푼 문제만 보기',
+    enum: ['true', 'false'],
   })
   @ApiQuery({
     required: false,
