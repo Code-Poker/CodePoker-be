@@ -199,7 +199,7 @@ export class BojRepository {
       `https://www.acmicpc.net/school/ranklist/323/` + Math.ceil(page / 2);
     await this.browser.url(url);
 
-    return await this.browser.execute(() => {
+    return await this.browser.execute((page) => {
       const users = document.querySelectorAll('#ranklist > tbody > tr');
       const ranking = [];
       for (let rank = 0; rank < 50; rank++) {
@@ -215,6 +215,6 @@ export class BojRepository {
       }
 
       return ranking;
-    });
+    }, page);
   }
 }
