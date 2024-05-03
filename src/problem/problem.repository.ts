@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 
+import { Problem } from './entities/problem.entity';
 import { IProblem } from './interfaces/problem.interface';
 
 @Injectable()
@@ -9,19 +10,19 @@ export class ProblemRepository {
     @Inject('PROBLEM_MODEL') private readonly problemModel: Model<IProblem>,
   ) {}
 
-  create(problem: IProblem) {
+  create(problem: Problem) {
     return new this.problemModel(problem).save();
   }
 
-  getAll(): Promise<IProblem[]> {
+  getAll() {
     return this.problemModel.find().exec();
   }
 
-  get(problemId: number): Promise<IProblem> {
+  get(problemId: number) {
     return this.problemModel.findOne({ problemId }).exec();
   }
 
-  update(problemId: number, problem: IProblem): Promise<IProblem> {
+  update(problemId: number, problem: Problem) {
     return this.problemModel.findOneAndUpdate({ problemId }, problem).exec();
   }
 
