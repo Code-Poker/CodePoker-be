@@ -1,220 +1,221 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import * as cheerio from 'cheerio';
 import * as process from 'node:process';
 
 import { Contest } from './entities/contest.entity';
 
 @Injectable()
 export class BojRepository {
-  constructor(
-    @Inject('WEBDRIVER')
-    private readonly browser: WebdriverIO.Browser,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
   async getUserProblems(handle: string) {
     const url = `https://www.acmicpc.net/user/${handle}`;
-    await this.browser.url(url);
 
-    return await this.browser.execute(() => {
-      const panelTitle = {
+    const response = cheerio.load(
+      await this.httpService.axiosRef
+        .get(url, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+          },
+        })
+        .then((res) => res.data),
+    );
+
+    const problems = {
+      solved: [],
+      tried: [],
+      extra: [],
+    };
+
+    const panels = response('.panel.panel-default');
+    for (let i = 0; i < panels.length; i++) {
+      const title = panels.eq(i).find('.panel-title').text();
+      const panelType = {
         '맞은 문제': 'solved',
         '맞았지만 만점을 받지 못한 문제': 'tried',
         '시도했지만 맞지 못한 문제': 'tried',
         '맞은 번외 문제': 'extra',
-      };
-
-      const problems = {
-        solved: [],
-        tried: [],
-        extra: [],
-      };
-
-      const panels = document.querySelectorAll('.panel.panel-default');
-      for (const panel of panels) {
-        const title = panel.querySelector('.panel-title').textContent;
-        const panelType = panelTitle[title];
-        if (!panelType) {
-          continue;
-        }
-        const rows = panel.querySelectorAll('.problem-list > a');
-        for (const row of rows) {
-          const problemId = +row.textContent;
-          problems[panelType].push(problemId);
-        }
+      }[title];
+      if (!panelType) {
+        continue;
       }
 
-      return problems;
-    });
+      const rows = panels.eq(i).find('.problem-list > a');
+      for (let j = 0; j < rows.length; j++) {
+        const problemId = +rows.eq(j).text();
+        problems[panelType].push(problemId);
+      }
+    }
+
+    return problems;
   }
 
   async getEndedContests(): Promise<Contest[]> {
     const endedUrl = 'https://www.acmicpc.net/contest/official/list';
-    await this.browser.url(endedUrl);
 
-    return await this.browser.execute(() => {
-      const contests: Contest[] = [];
-      const rows = document.querySelectorAll(
-        'body > div.wrapper > div.container.content > div.row > div:nth-child(2) > div > table > tbody > tr',
-      );
+    const response = cheerio.load(
+      await this.httpService.axiosRef
+        .get(endedUrl, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+          },
+        })
+        .then((res) => res.data),
+    );
 
-      for (const row of rows) {
-        const venue = 'BOJ Open';
-        const name = row.querySelector('td:nth-child(1) > a').textContent;
-        const url =
-          'https://www.acmicpc.net' +
-          row.querySelector('td:nth-child(1) > a').getAttribute('href');
-        const startDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(4) > span')
-              .getAttribute('data-timestamp'),
-        ).toISOString();
-        const endDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(5) > span')
-              .getAttribute('data-timestamp'),
-        ).toISOString();
-        contests.push({ venue, name, url, startDate, endDate });
-      }
-      return contests;
-    });
+    const contests = [];
+
+    const rows = response(
+      'body > div.wrapper > div.container.content > div.row > div:nth-child(2) > div > table > tbody > tr',
+    );
+    for (let i = 0; i < rows.length; i++) {
+      const venue = 'BOJ Open';
+      const name = rows.eq(i).find('td:nth-child(1) > a').text();
+      const url = 'https://www.acmicpc.net' + rows.eq(i).find('td:nth-child(1) > a').attr('href');
+      const startDate = new Date(
+        1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp'),
+      ).toISOString();
+      const endDate = new Date(1000 * +rows.eq(i).find('td:nth-child(5) > span').attr('data-timestamp')).toISOString();
+
+      contests.push(new Contest(venue, name, url, startDate, endDate));
+    }
+
+    return contests;
   }
 
   async getOngoingContests(): Promise<Contest[]> {
     const otherUrl = 'https://www.acmicpc.net/contest/other/list';
-    await this.browser.url(otherUrl);
-    await this.browser.setCookies([
-      {
-        name: 'bojautologin',
-        value: process.env.BOJ_AUTO_LOGIN,
-      },
-    ]);
 
-    return await this.browser.execute(() => {
-      const contests: Contest[] = [];
+    const response = cheerio.load(
+      await this.httpService.axiosRef
+        .get(otherUrl, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
+          },
+        })
+        .then((res) => res.data),
+    );
 
-      if (document.getElementsByClassName('col-md-12').length < 6) {
-        return contests;
-      }
+    const contests = [];
 
-      const rows = document.querySelectorAll(
-        'body > div.wrapper > div.container.content > div.row > div:nth-child(3) > div > table > tbody > tr',
-      );
+    const rowIndex = response('.col-md-12').length === 6 ? 5 : 4;
+    const rows = response(
+      `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
+    );
+    for (let i = 0; i < rows.length; i++) {
+      const venue = rows.eq(i).find('td:nth-child(1)').text();
+      const name = rows.eq(i).find('td:nth-child(2)').text();
+      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href');
+      const startDate = new Date(
+        1000 * +rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp'),
+      ).toISOString();
+      const endDate = new Date(1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')).toISOString();
+      contests.push({ venue, name, url, startDate, endDate });
+    }
 
-      for (const row of rows) {
-        const venue = row.querySelector('td:nth-child(1)').textContent;
-        const name = row.querySelector('td:nth-child(2)').textContent;
-        let url = null;
-        if (row.querySelector('td:nth-child(2) > a')) {
-          url = row.querySelector('td:nth-child(2) > a').getAttribute('href');
-        }
-        const startDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(3) > span')
-              .getAttribute('data-timestamp'),
-        ).toISOString();
-        const endDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(4) > span')
-              .getAttribute('data-timestamp'),
-        ).toISOString();
-        contests.push({ venue, name, url, startDate, endDate });
-      }
-      return contests;
-    });
+    return contests;
   }
 
   async getUpcomingContests(): Promise<Contest[]> {
     const otherUrl = 'https://www.acmicpc.net/contest/other/list';
-    await this.browser.url(otherUrl);
-    await this.browser.setCookies([
-      {
-        name: 'bojautologin',
-        value: process.env.BOJ_AUTO_LOGIN,
-      },
-    ]);
 
-    return await this.browser.execute(() => {
-      const contests: Contest[] = [];
+    const response = cheerio.load(
+      await this.httpService.axiosRef
+        .get(otherUrl, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
+          },
+        })
+        .then((res) => res.data),
+    );
 
-      const rowIndex =
-        document.getElementsByClassName('col-md-12').length === 6 ? 5 : 4;
-      const rows = document.querySelectorAll(
-        `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
-      );
-      for (const row of rows) {
-        const venue = row.querySelector('td:nth-child(1)').textContent;
-        const name = row.querySelector('td:nth-child(2)').textContent;
-        let url = null;
-        if (row.querySelector('td:nth-child(2) > a')) {
-          url = row.querySelector('td:nth-child(2) > a').getAttribute('href');
-        }
-        const startDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(3) > span')
-              .getAttribute('data-timestamp'),
-        ).toISOString();
-        const endDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(4) > span')
-              .getAttribute('data-timestamp'),
-        ).toISOString();
-        contests.push({ venue, name, url, startDate, endDate });
-      }
-      return contests;
-    });
+    const contests = [];
+
+    const rowIndex = response('.col-md-12').length === 6 ? 5 : 4;
+    const rows = response(
+      `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
+    );
+    for (let i = 0; i < rows.length; i++) {
+      const venue = rows.eq(i).find('td:nth-child(1)').text();
+      const name = rows.eq(i).find('td:nth-child(2)').text();
+      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href');
+      const startDate = new Date(
+        1000 * +rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp'),
+      ).toISOString();
+      const endDate = new Date(1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')).toISOString();
+      contests.push({ venue, name, url, startDate, endDate });
+    }
+
+    return contests;
   }
 
   async getSSUInfo() {
     const bojUrl = `https://www.acmicpc.net/ranklist/school`;
-    await this.browser.url(bojUrl);
 
-    return await this.browser.execute(() => {
-      const schools = document.querySelectorAll('#ranklist > tbody > tr');
+    const response = cheerio.load(
+      await this.httpService.axiosRef
+        .get(bojUrl, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+          },
+        })
+        .then((res) => res.data),
+    );
 
-      const ssu = Array.from(schools).find((school) => {
-        return (
-          school.querySelector(' td:nth-child(2)').textContent === '숭실대학교'
-        );
-      });
-
-      if (!ssu) {
-        return null;
-      }
-
-      const bojRank = +ssu.querySelector(' td:nth-child(1)').textContent;
-      const bojUserCount = +ssu.querySelector('td:nth-child(3)').textContent;
-      const bojSubmitCount = +ssu.querySelector('td:nth-child(5)').textContent;
-
-      return { bojRank, bojUserCount, bojSubmitCount };
+    const schools = response('#ranklist > tbody > tr');
+    const ssu = Array.from(schools).find((school) => {
+      return response(school).find('td:nth-child(2) > a').text() === '숭실대학교';
     });
+
+    if (!ssu) {
+      return null;
+    }
+
+    const bojRank = +response(ssu).find('td:nth-child(1)').text();
+    const bojUserCount = +response(ssu).find('td:nth-child(3)').text();
+    const bojSolvedCount = +response(ssu).find('td:nth-child(4)').text();
+    const bojSubmitCount = +response(ssu).find('td:nth-child(5)').text();
+
+    return { bojRank, bojUserCount, bojSolvedCount, bojSubmitCount };
   }
 
   async getSSURanking(page: number) {
-    const url =
-      `https://www.acmicpc.net/school/ranklist/323/` + Math.ceil(page / 2);
-    await this.browser.url(url);
+    const url = `https://www.acmicpc.net/school/ranklist/323/` + Math.ceil(page / 2);
 
-    return await this.browser.execute((page) => {
-      const users = document.querySelectorAll('#ranklist > tbody > tr');
-      const ranking = [];
-      for (let rank = 0; rank < 50; rank++) {
-        const user = users[page % 2 ? rank : rank + 50];
-        if (!user) {
-          break;
-        }
-        const handle = user.querySelector('td:nth-child(2) > a').textContent;
-        const bio = user.querySelector('td:nth-child(3)').textContent;
-        const solvedCount = +user.querySelector('td:nth-child(4)').textContent;
-        const submitCount = +user.querySelector('td:nth-child(5)').textContent;
-        ranking.push({ rank: rank + 1, handle, bio, solvedCount, submitCount });
+    const response = cheerio.load(
+      await this.httpService.axiosRef
+        .get(url, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+          },
+        })
+        .then((res) => res.data),
+    );
+
+    const users = response('#ranklist > tbody > tr');
+    const ranking = [];
+
+    for (let rank = 0; rank < 50; rank++) {
+      const user = users[page % 2 ? rank : rank + 50];
+      if (!user) {
+        break;
       }
+      const handle = response(user).find('td:nth-child(2) > a').text();
+      const bio = response(user).find('td:nth-child(3)').text();
+      const solved = +response(user).find('td:nth-child(4)').text();
+      const submit = +response(user).find('td:nth-child(5)').text();
+      ranking.push({ rank: (page - 1) * 50 + rank + 1, bio, handle, solved, submit });
+    }
 
-      return ranking;
-    }, page);
+    return ranking;
   }
 }

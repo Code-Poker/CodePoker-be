@@ -20,12 +20,7 @@ export class SolvedRepository {
       .then((res) => res.data);
   }
 
-  async getSSUProblems(
-    solved: string,
-    page: number,
-    sort: string,
-    direction: string,
-  ) {
+  async getSSUProblems(solved: string, page: number, sort: string, direction: string) {
     const url = `https://solved.ac/api/v3/search/problem`;
     const query = solved === 'true' ? 'o@ssu' : '!o@ssu';
     return await this.httpService.axiosRef

@@ -24,11 +24,7 @@ export class ProblemService {
 
     for (let page = 1; page <= (problemIds.length + 49) / 50; page++) {
       let url = `https://solved.ac/api/v3/search/problem?query=`;
-      for (
-        let i = (page - 1) * 50;
-        i < page * 50 && i < problemIds.length;
-        i++
-      ) {
+      for (let i = (page - 1) * 50; i < page * 50 && i < problemIds.length; i++) {
         url = url.concat('id:' + problemIds[i] + '|');
       }
 
@@ -36,9 +32,7 @@ export class ProblemService {
         .get(url)
         .then((res) => res.data)
         .catch((err) => {
-          throw new Error(
-            err?.message + ': ' + JSON.stringify(err?.response?.data),
-          );
+          throw new Error(err?.message + ': ' + JSON.stringify(err?.response?.data));
         });
 
       for (const problem of response['items']) {

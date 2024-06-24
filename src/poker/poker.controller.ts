@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { CreatePokerDto } from './dto/create-poker.dto';
@@ -23,10 +15,7 @@ export class PokerController {
     name: 'name',
     description: '포커 이름',
   })
-  async create(
-    @Query('name') name: string,
-    @Body() createPokerDto: CreatePokerDto,
-  ) {
+  async create(@Query('name') name: string, @Body() createPokerDto: CreatePokerDto) {
     return this.pokerService.create(name, createPokerDto);
   }
 

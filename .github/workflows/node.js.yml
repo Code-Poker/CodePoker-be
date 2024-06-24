@@ -35,3 +35,4 @@ jobs:
           SOLVEDAC_TOKEN: ${{ secrets.SOLVEDAC_TOKEN }}
       - run: npm ci
       - run: npm run build --if-present
+      - run: npm test

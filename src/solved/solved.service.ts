@@ -10,18 +10,8 @@ export class SolvedService {
     return await this.solvedRepository.getSSUInfo();
   }
 
-  async getSSUProblems(
-    solved: string,
-    page: number,
-    sort: string,
-    direction: string,
-  ) {
-    return await this.solvedRepository.getSSUProblems(
-      solved,
-      page,
-      sort,
-      direction,
-    );
+  async getSSUProblems(solved: string, page: number, sort: string, direction: string) {
+    return await this.solvedRepository.getSSUProblems(solved, page, sort, direction);
   }
 
   async getSSUSolvedRanking(page: number) {
