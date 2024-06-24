@@ -24,6 +24,16 @@ export class Contest {
     description: '대회 종료 날짜',
   })
   endDate: string;
+
+  constructor(venue: string, name: string, url: string, startDate: string, endDate: string) {
+    this.venue = venue;
+    this.name = name;
+    this.url = url;
+    this.startDate = startDate;
+    this.endDate = endDate;
+
+    return this;
+  }
 }
 
 export class ContestList {

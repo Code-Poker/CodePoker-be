@@ -79,7 +79,8 @@ export class BojRepository {
         1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp'),
       ).toISOString();
       const endDate = new Date(1000 * +rows.eq(i).find('td:nth-child(5) > span').attr('data-timestamp')).toISOString();
-      contests.push({ venue, name, url, startDate, endDate });
+
+      contests.push(new Contest(venue, name, url, startDate, endDate));
     }
 
     return contests;
