@@ -16,9 +16,7 @@ export class UserService {
         })
         .then((res) => res.data)
         .catch((err) => {
-          throw new Error(
-            err?.message + ': ' + JSON.stringify(err?.response?.data),
-          );
+          throw new Error(err?.message + ': ' + JSON.stringify(err?.response?.data));
         }),
     );
 
@@ -37,12 +35,9 @@ export class UserService {
         .get(url)
         .then((res) => res.data)
         .catch((err) => {
-          throw new Error(
-            err?.message + ': ' + JSON.stringify(err?.response?.data),
-          );
+          throw new Error(err?.message + ': ' + JSON.stringify(err?.response?.data));
         })
-        .then((res) => res['profileImageUrl'])) ??
-      'https://static.solved.ac/misc/default_profile.png'
+        .then((res) => res['profileImageUrl'])) ?? 'https://static.solved.ac/misc/default_profile.png'
     );
   }
 

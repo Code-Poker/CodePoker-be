@@ -42,8 +42,7 @@ export class PokerService {
     for (const participant of createPokerDto.participants) {
       const handle = participant.handle;
       const goal = participant.goal;
-      const profileImage =
-        await this.userService.getProfileImageFromSolved(handle);
+      const profileImage = await this.userService.getProfileImageFromSolved(handle);
 
       const snapshot = await this.userService.getProblemsFromBoj(handle);
       poker.participants.push({
@@ -82,8 +81,7 @@ export class PokerService {
     const pokers = (await this.pokerRepository.getAll()) as Poker[];
     for (const poker of pokers) {
       for (const participant in poker.participants) {
-        const { handle, profileImage, goal, point, tasksDone } =
-          poker.participants[participant];
+        const { handle, profileImage, goal, point, tasksDone } = poker.participants[participant];
         poker.participants[participant] = {
           handle,
           profileImage,
@@ -123,9 +121,7 @@ export class PokerService {
 
     for (const participant of poker.participants) {
       const snapshot = participant.snapshot;
-      const present = await this.userService.getProblemsFromBoj(
-        participant.handle,
-      );
+      const present = await this.userService.getProblemsFromBoj(participant.handle);
 
       const solved = [];
       for (const problem of present) {
@@ -134,12 +130,8 @@ export class PokerService {
         }
       }
 
-      const solvedProblems =
-        await this.problemService.getProblemsFromSolved(solved);
-      participant.point = solvedProblems.reduce(
-        (acc, cur) => acc + this.userService.levelToPoint(cur.level),
-        0,
-      );
+      const solvedProblems = await this.problemService.getProblemsFromSolved(solved);
+      participant.point = solvedProblems.reduce((acc, cur) => acc + this.userService.levelToPoint(cur.level), 0);
 
       participant.result = solvedProblems.map((problem) => {
         return {

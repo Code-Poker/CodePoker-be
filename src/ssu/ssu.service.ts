@@ -11,8 +11,7 @@ export class SsuService {
   ) {}
 
   async info() {
-    const { bojUserCount, bojRank, bojSubmitCount } =
-      await this.bojService.getSSUInfo();
+    const { bojUserCount, bojRank, bojSubmitCount } = await this.bojService.getSSUInfo();
     const ssuInfo = await this.solvedService.getSSUInfo();
 
     return {
@@ -23,18 +22,8 @@ export class SsuService {
     };
   }
 
-  async solvedProblems(
-    solved: string,
-    page: number,
-    sort: string,
-    direction: string,
-  ) {
-    return await this.solvedService.getSSUProblems(
-      solved,
-      page,
-      sort,
-      direction,
-    );
+  async solvedProblems(solved: string, page: number, sort: string, direction: string) {
+    return await this.solvedService.getSSUProblems(solved, page, sort, direction);
   }
 
   async solvedRanking(page: number) {

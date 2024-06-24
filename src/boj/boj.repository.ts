@@ -59,20 +59,12 @@ export class BojRepository {
       for (const row of rows) {
         const venue = 'BOJ Open';
         const name = row.querySelector('td:nth-child(1) > a').textContent;
-        const url =
-          'https://www.acmicpc.net' +
-          row.querySelector('td:nth-child(1) > a').getAttribute('href');
+        const url = 'https://www.acmicpc.net' + row.querySelector('td:nth-child(1) > a').getAttribute('href');
         const startDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(4) > span')
-              .getAttribute('data-timestamp'),
+          1000 * +row.querySelector('td:nth-child(4) > span').getAttribute('data-timestamp'),
         ).toISOString();
         const endDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(5) > span')
-              .getAttribute('data-timestamp'),
+          1000 * +row.querySelector('td:nth-child(5) > span').getAttribute('data-timestamp'),
         ).toISOString();
         contests.push({ venue, name, url, startDate, endDate });
       }
@@ -109,16 +101,10 @@ export class BojRepository {
           url = row.querySelector('td:nth-child(2) > a').getAttribute('href');
         }
         const startDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(3) > span')
-              .getAttribute('data-timestamp'),
+          1000 * +row.querySelector('td:nth-child(3) > span').getAttribute('data-timestamp'),
         ).toISOString();
         const endDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(4) > span')
-              .getAttribute('data-timestamp'),
+          1000 * +row.querySelector('td:nth-child(4) > span').getAttribute('data-timestamp'),
         ).toISOString();
         contests.push({ venue, name, url, startDate, endDate });
       }
@@ -139,8 +125,7 @@ export class BojRepository {
     return await this.browser.execute(() => {
       const contests: Contest[] = [];
 
-      const rowIndex =
-        document.getElementsByClassName('col-md-12').length === 6 ? 5 : 4;
+      const rowIndex = document.getElementsByClassName('col-md-12').length === 6 ? 5 : 4;
       const rows = document.querySelectorAll(
         `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
       );
@@ -152,16 +137,10 @@ export class BojRepository {
           url = row.querySelector('td:nth-child(2) > a').getAttribute('href');
         }
         const startDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(3) > span')
-              .getAttribute('data-timestamp'),
+          1000 * +row.querySelector('td:nth-child(3) > span').getAttribute('data-timestamp'),
         ).toISOString();
         const endDate = new Date(
-          1000 *
-            +row
-              .querySelector('td:nth-child(4) > span')
-              .getAttribute('data-timestamp'),
+          1000 * +row.querySelector('td:nth-child(4) > span').getAttribute('data-timestamp'),
         ).toISOString();
         contests.push({ venue, name, url, startDate, endDate });
       }
@@ -177,9 +156,7 @@ export class BojRepository {
       const schools = document.querySelectorAll('#ranklist > tbody > tr');
 
       const ssu = Array.from(schools).find((school) => {
-        return (
-          school.querySelector(' td:nth-child(2)').textContent === '숭실대학교'
-        );
+        return school.querySelector(' td:nth-child(2)').textContent === '숭실대학교';
       });
 
       if (!ssu) {
@@ -195,8 +172,7 @@ export class BojRepository {
   }
 
   async getSSURanking(page: number) {
-    const url =
-      `https://www.acmicpc.net/school/ranklist/323/` + Math.ceil(page / 2);
+    const url = `https://www.acmicpc.net/school/ranklist/323/` + Math.ceil(page / 2);
     await this.browser.url(url);
 
     return await this.browser.execute((page) => {

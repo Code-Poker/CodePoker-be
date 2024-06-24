@@ -6,9 +6,7 @@ import { IProblem } from './interfaces/problem.interface';
 
 @Injectable()
 export class ProblemRepository {
-  constructor(
-    @Inject('PROBLEM_MODEL') private readonly problemModel: Model<IProblem>,
-  ) {}
+  constructor(@Inject('PROBLEM_MODEL') private readonly problemModel: Model<IProblem>) {}
 
   create(problem: Problem) {
     return new this.problemModel(problem).save();
