@@ -207,11 +207,11 @@ export class BojRepository {
       if (!user) {
         break;
       }
-      const handle = user['children'][1]['children'][0]['data'];
-      const bio = user['children'][2]['children'][0]['data'];
-      const solvedCount = +user['children'][3]['children'][0]['data'];
-      const submitCount = +user['children'][4]['children'][0]['data'];
-      ranking.push({ rank: rank + 1, handle, bio, solvedCount, submitCount });
+      const handle = response(user).find('td:nth-child(2) > a').text();
+      const bio = response(user).find('td:nth-child(3)').text();
+      const solved = +response(user).find('td:nth-child(4)').text();
+      const submit = +response(user).find('td:nth-child(5)').text();
+      ranking.push({ rank: (page - 1) * 50 + rank + 1, bio, handle, solved, submit });
     }
 
     return ranking;
