@@ -171,18 +171,19 @@ export class BojRepository {
 
     const schools = response('#ranklist > tbody > tr');
     const ssu = Array.from(schools).find((school) => {
-      return school['children'][1]['children'][0]['data'] === '숭실대학교';
+      return response(school).find('td:nth-child(2) > a').text() === '숭실대학교';
     });
 
     if (!ssu) {
       return null;
     }
 
-    const bojRank = +ssu['children'][0]['data'];
-    const bojUserCount = +ssu['children'][2]['children'][0]['data'];
-    const bojSubmitCount = +ssu['children'][4]['children'][0]['data'];
+    const bojRank = +response(ssu).find('td:nth-child(1)').text();
+    const bojUserCount = +response(ssu).find('td:nth-child(3)').text();
+    const bojSolvedCount = +response(ssu).find('td:nth-child(4)').text();
+    const bojSubmitCount = +response(ssu).find('td:nth-child(5)').text();
 
-    return { bojRank, bojUserCount, bojSubmitCount };
+    return { bojRank, bojUserCount, bojSolvedCount, bojSubmitCount };
   }
 
   async getSSURanking(page: number) {

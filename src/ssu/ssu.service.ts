@@ -11,12 +11,13 @@ export class SsuService {
   ) {}
 
   async info() {
-    const { bojUserCount, bojRank, bojSubmitCount } = await this.bojService.getSSUInfo();
+    const { bojUserCount, bojRank, bojSolvedCount, bojSubmitCount } = await this.bojService.getSSUInfo();
     const ssuInfo = await this.solvedService.getSSUInfo();
 
     return {
       bojUserCount,
       bojRank,
+      bojSolvedCount,
       bojSubmitCount,
       ...ssuInfo,
     };
