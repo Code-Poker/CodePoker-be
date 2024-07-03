@@ -17,6 +17,6 @@ export const PokerSchema = new mongoose.Schema({
   name: String,
   tasks: [Number],
   participants: [ParticipantSchema],
-  startDate: Date,
-  endDate: Date,
+  startTime: Date,
+  endTime: Date,
 });

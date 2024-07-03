@@ -87,73 +87,21 @@ export class BojRepository {
   }
 
   async getOngoingContests(): Promise<Contest[]> {
-    const otherUrl = 'https://www.acmicpc.net/contest/other/list';
+    const response = await this.otherResponse();
 
-    const response = cheerio.load(
-      await this.httpService.axiosRef
-        .get(otherUrl, {
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
-            Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
-          },
-        })
-        .then((res) => res.data),
-    );
-
-    const contests = [];
-
-    const rowIndex = response('.col-md-12').length === 6 ? 5 : 4;
-    const rows = response(
-      `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
-    );
-    for (let i = 0; i < rows.length; i++) {
-      const venue = rows.eq(i).find('td:nth-child(1)').text();
-      const name = rows.eq(i).find('td:nth-child(2)').text();
-      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href');
-      const startDate = new Date(
-        1000 * +rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp'),
-      ).toISOString();
-      const endDate = new Date(1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')).toISOString();
-      contests.push({ venue, name, url, startDate, endDate });
+    if (response('.col-md-12').length < 6) {
+      return [];
     }
 
-    return contests;
+    return this.contestsFromOther(response, 3);
   }
 
   async getUpcomingContests(): Promise<Contest[]> {
-    const otherUrl = 'https://www.acmicpc.net/contest/other/list';
-
-    const response = cheerio.load(
-      await this.httpService.axiosRef
-        .get(otherUrl, {
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
-            Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
-          },
-        })
-        .then((res) => res.data),
-    );
-
-    const contests = [];
+    const response = await this.otherResponse();
 
     const rowIndex = response('.col-md-12').length === 6 ? 5 : 4;
-    const rows = response(
-      `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
-    );
-    for (let i = 0; i < rows.length; i++) {
-      const venue = rows.eq(i).find('td:nth-child(1)').text();
-      const name = rows.eq(i).find('td:nth-child(2)').text();
-      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href');
-      const startDate = new Date(
-        1000 * +rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp'),
-      ).toISOString();
-      const endDate = new Date(1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')).toISOString();
-      contests.push({ venue, name, url, startDate, endDate });
-    }
 
-    return contests;
+    return this.contestsFromOther(response, rowIndex);
   }
 
   async getSSUInfo() {
@@ -217,5 +165,41 @@ export class BojRepository {
     }
 
     return ranking;
+  }
+
+  private async otherResponse() {
+    const otherUrl = 'https://www.acmicpc.net/contest/other/list';
+
+    return cheerio.load(
+      await this.httpService.axiosRef
+        .get(otherUrl, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
+          },
+        })
+        .then((res) => res.data),
+    );
+  }
+
+  private async contestsFromOther(response: any, rowIndex: number): Promise<Contest[]> {
+    const contests = [];
+
+    const rows = response(
+      `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
+    );
+    for (let i = 0; i < rows.length; i++) {
+      const venue = rows.eq(i).find('td:nth-child(1)').text();
+      const name = rows.eq(i).find('td:nth-child(2)').text();
+      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href');
+      const startTime = new Date(
+        1000 * +rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp'),
+      ).toISOString();
+      const endTime = new Date(1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')).toISOString();
+      contests.push({ venue, name, url, startTime, endTime });
+    }
+
+    return contests;
   }
 }

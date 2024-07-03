@@ -16,6 +16,6 @@ export class Poker {
   name: string;
   tasks: number[];
   participants: Participant[];
-  startDate: Date;
-  endDate: Date;
+  startTime: Date;
+  endTime: Date;
 }
