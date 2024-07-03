@@ -13,9 +13,9 @@ export class BojService {
 
   async getContests() {
     const contests: ContestList = new ContestList();
-    contests.endedContests = await this.bojRepository.getEndedContests();
-    contests.ongoingContests = await this.bojRepository.getOngoingContests();
-    contests.upcomingContests = await this.bojRepository.getUpcomingContests();
+    contests.ended = await this.bojRepository.getEndedContests();
+    contests.ongoing = await this.bojRepository.getOngoingContests();
+    contests.upcoming = await this.bojRepository.getUpcomingContests();
 
     return contests;
   }

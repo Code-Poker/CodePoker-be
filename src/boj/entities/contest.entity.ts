@@ -37,7 +37,7 @@ export class Contest {
 }
 
 export class ContestList {
-  endedContests: Contest[];
-  ongoingContests: Contest[];
-  upcomingContests: Contest[];
+  ended: Contest[];
+  ongoing: Contest[];
+  upcoming: Contest[];
 }
