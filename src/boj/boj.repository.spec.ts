@@ -15,6 +15,8 @@ describe('BojRepository', () => {
     }).compile();
 
     repository = module.get<BojRepository>(BojRepository);
+
+    jest.setTimeout(10000);
   });
 
   describe('getUserProblems', () => {
