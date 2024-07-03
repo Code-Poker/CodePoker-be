@@ -4,11 +4,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BojModule } from './boj/boj.module';
 import { GroupModule } from './group/group.module';
 import { PokerModule } from './poker/poker.module';
+import { SolvedModule } from './solved/solved.module';
 import { SsuModule } from './ssu/ssu.module';
 
 export const configSwagger = (app: INestApplication<any>) => {
   configCodePoker(app);
   configSSUJoon(app);
+  configSolved(app);
 };
 
 const configCodePoker = (app: INestApplication<any>) => {
@@ -36,4 +38,12 @@ const configSSUJoon = (app: INestApplication<any>) => {
     include: [SsuModule],
   });
   SwaggerModule.setup('ssu', app, document);
+};
+
+const configSolved = (app: INestApplication<any>) => {
+  const options = new DocumentBuilder().setTitle('solved API').setVersion('1.0').addTag('solved', 'solved api').build();
+  const document = SwaggerModule.createDocument(app, options, {
+    include: [SolvedModule],
+  });
+  SwaggerModule.setup('solved', app, document);
 };
