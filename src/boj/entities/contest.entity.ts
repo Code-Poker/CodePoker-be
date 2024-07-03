@@ -17,20 +17,20 @@ export class Contest {
     example: new Date('2024-05-04 14:00:00 GMT+0900'),
     description: '대회 시작 날짜',
   })
-  startDate: string;
+  startTime: string;
 
   @ApiProperty({
     example: new Date('2024-05-04 16:30:00 GMT+0900'),
     description: '대회 종료 날짜',
   })
-  endDate: string;
+  endTime: string;
 
-  constructor(venue: string, name: string, url: string, startDate: string, endDate: string) {
+  constructor(venue: string, name: string, url: string, startTime: string, endTime: string) {
     this.venue = venue;
     this.name = name;
     this.url = url;
-    this.startDate = startDate;
-    this.endDate = endDate;
+    this.startTime = startTime;
+    this.endTime = endTime;
 
     return this;
   }

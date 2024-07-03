@@ -18,6 +18,6 @@ export interface IPoker extends Document {
   name: string;
   tasks: number[];
   participants: IParticipant[];
-  startDate: Date;
-  endDate: Date;
+  startTime: Date;
+  endTime: Date;
 }

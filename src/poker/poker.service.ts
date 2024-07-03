@@ -26,8 +26,8 @@ export class PokerService {
       name,
       participants: [],
       tasks: createPokerDto.tasks,
-      startDate: new Date(),
-      endDate: createPokerDto.endDate,
+      startTime: new Date(),
+      endTime: createPokerDto.endDate,
     };
 
     const res: Poker = {
@@ -35,8 +35,8 @@ export class PokerService {
       name,
       participants: [],
       tasks: createPokerDto.tasks,
-      startDate: new Date(),
-      endDate: createPokerDto.endDate,
+      startTime: new Date(),
+      endTime: createPokerDto.endDate,
     };
 
     for (const participant of createPokerDto.participants) {
@@ -108,7 +108,7 @@ export class PokerService {
   async refreshRecent() {
     const pokers = (await this.pokerRepository.getAll()) as Poker[];
     for (const poker of pokers) {
-      if (poker.endDate < new Date()) {
+      if (poker.endTime < new Date()) {
         continue;
       }
       await this.refresh(poker.id);
