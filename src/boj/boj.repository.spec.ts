@@ -1,4 +1,5 @@
 import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
 import { BojRepository } from './boj.repository';
@@ -9,7 +10,7 @@ describe('BojRepository', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [HttpModule],
+      imports: [HttpModule, ConfigModule.forRoot()],
       providers: [BojRepository],
     }).compile();
 

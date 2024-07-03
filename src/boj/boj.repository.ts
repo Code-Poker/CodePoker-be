@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as cheerio from 'cheerio';
 import * as process from 'node:process';
 
@@ -7,7 +8,10 @@ import { Contest } from './entities/contest.entity';
 
 @Injectable()
 export class BojRepository {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
+  ) {}
 
   async getUserProblems(handle: string) {
     const url = `https://www.acmicpc.net/user/${handle}`;
@@ -16,8 +20,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get(url, {
           headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
         })
         .then((res) => res.data),
@@ -59,8 +62,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get(endedUrl, {
           headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
         })
         .then((res) => res.data),
@@ -111,8 +113,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get(bojUrl, {
           headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
         })
         .then((res) => res.data),
@@ -142,8 +143,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get(url, {
           headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
         })
         .then((res) => res.data),
@@ -174,8 +174,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get(otherUrl, {
           headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/',
+            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
             Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
           },
         })
@@ -184,7 +183,7 @@ export class BojRepository {
   }
 
   private async contestsFromOther(response: any, rowIndex: number): Promise<Contest[]> {
-    const contests = [];
+    const contests: Contest[] = [];
 
     const rows = response(
       `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
@@ -197,7 +196,7 @@ export class BojRepository {
         1000 * +rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp'),
       ).toISOString();
       const endTime = new Date(1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')).toISOString();
-      contests.push({ venue, name, url, startTime, endTime });
+      contests.push(new Contest(venue, name, url, startTime, endTime));
     }
 
     return contests;
