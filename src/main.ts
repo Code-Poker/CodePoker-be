@@ -20,4 +20,5 @@ async function bootstrap() {
 bootstrap().then(() => {
   console.log(`Server is running on http://localhost:${process.env.PORT}/api`);
   console.log(`SSU API is running on http://localhost:${process.env.PORT}/ssu`);
+  console.log(`solved API is running on http://localhost:${process.env.PORT}/solved`);
 });
