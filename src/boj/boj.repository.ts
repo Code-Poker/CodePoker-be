@@ -101,7 +101,7 @@ export class BojRepository {
   async getUpcomingContests(): Promise<Contest[]> {
     const response = await this.otherResponse();
 
-    const rowIndex = response('.col-md-12').length === 6 ? 5 : 4;
+    const rowIndex = response('.col-md-12').length === 6 ? 5 : 3;
 
     return this.contestsFromOther(response, rowIndex);
   }
