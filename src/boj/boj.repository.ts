@@ -74,6 +74,10 @@ export class BojRepository {
       'body > div.wrapper > div.container.content > div.row > div:nth-child(2) > div > table > tbody > tr',
     );
     for (let i = 0; i < rows.length; i++) {
+      if (rows.eq(i).find('td:nth-child(6)').text() !== '종료') {
+        continue;
+      }
+
       const venue = 'BOJ Open';
       const name = rows.eq(i).find('td:nth-child(1) > a').text();
       const url = 'https://www.acmicpc.net' + rows.eq(i).find('td:nth-child(1) > a').attr('href');
