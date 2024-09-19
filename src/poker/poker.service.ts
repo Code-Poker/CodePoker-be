@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { GroupRepository } from '../group/group.repository';
 import { ProblemService } from '../problem/problem.service';
@@ -104,7 +103,6 @@ export class PokerService {
     return createdPoker;
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
   async refreshRecent() {
     const pokers = (await this.pokerRepository.getAll()) as Poker[];
     for (const poker of pokers) {
