@@ -25,12 +25,34 @@ export class Contest {
   })
   endTime: string;
 
-  constructor(venue: string, name: string, url: string, startTime: string, endTime: string) {
+  @ApiProperty({
+    example: '1문제 이상 해결',
+    description: '뱃지 획득 조건',
+  })
+  badge: string;
+
+  @ApiProperty({
+    example: '1문제 이상 해결',
+    description: '배경 획득 조건',
+  })
+  background: string;
+
+  constructor(
+    venue: string,
+    name: string,
+    url: string,
+    startTime: string,
+    endTime: string,
+    badge?: string,
+    background?: string,
+  ) {
     this.venue = venue;
     this.name = name;
     this.url = url;
     this.startTime = startTime;
     this.endTime = endTime;
+    this.badge = badge;
+    this.background = background;
 
     return this;
   }

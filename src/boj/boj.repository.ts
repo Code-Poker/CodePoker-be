@@ -171,6 +171,12 @@ export class BojRepository {
     return ranking;
   }
 
+  async getBaechu() {
+    const url = 'https://raw.githubusercontent.com/kiwiyou/baechu/main/db.json';
+
+    return this.httpService.axiosRef.get(url).then((res) => res.data);
+  }
+
   private async otherResponse() {
     const otherUrl = 'https://www.acmicpc.net/contest/other/list';
 
