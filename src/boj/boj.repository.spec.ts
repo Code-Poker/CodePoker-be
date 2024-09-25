@@ -21,7 +21,7 @@ describe('BojRepository', () => {
 
   describe('getUserProblems', () => {
     it('should return problems', async () => {
-      const problems = await repository.getUserProblems('w8385');
+      const problems = await repository.getUserProblems('w8385', 'type');
       expect(problems).toHaveProperty('solved');
       expect(problems.solved).toBeInstanceOf(Array);
       expect(problems).toHaveProperty('tried');
