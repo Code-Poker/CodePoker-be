@@ -13,7 +13,7 @@ export class BojRepository {
     private readonly httpService: HttpService,
   ) {}
 
-  async getUserProblems(handle: string) {
+  async getUserProblems(handle: string, key: string) {
     const url = `https://www.acmicpc.net/user/${handle}`;
 
     const response = cheerio.load(
@@ -26,11 +26,14 @@ export class BojRepository {
         .then((res) => res.data),
     );
 
-    const problems = {
-      solved: [],
-      tried: [],
-      extra: [],
-    };
+    const problems =
+      key === 'problemId'
+        ? {}
+        : {
+            solved: [],
+            tried: [],
+            extra: [],
+          };
 
     const panels = response('.panel.panel-default');
     for (let i = 0; i < panels.length; i++) {
@@ -48,7 +51,11 @@ export class BojRepository {
       const rows = panels.eq(i).find('.problem-list > a');
       for (let j = 0; j < rows.length; j++) {
         const problemId = +rows.eq(j).text();
-        problems[panelType].push(problemId);
+        if (key === 'problemId') {
+          problems[problemId] = panelType;
+        } else {
+          problems[panelType].push(problemId);
+        }
       }
     }
 

@@ -7,8 +7,8 @@ import { ContestList } from './entities/contest.entity';
 export class BojService {
   constructor(private readonly bojRepository: BojRepository) {}
 
-  async getUserProblems(handle: string) {
-    return await this.bojRepository.getUserProblems(handle);
+  async getUserProblems(handle: string, key: string) {
+    return await this.bojRepository.getUserProblems(handle, key);
   }
 
   async getContests() {
