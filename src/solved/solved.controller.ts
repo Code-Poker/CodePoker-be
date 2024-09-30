@@ -52,6 +52,14 @@ export class SolvedController {
     return this.solvedService.userTop100(handle);
   }
 
+  @Get('user/problem_stats')
+  @ApiQuery({
+    name: 'handle',
+  })
+  userProblemStats(@Query('handle') handle: string) {
+    return this.solvedService.userProblemStats(handle);
+  }
+
   @Get('user/tag_ratings')
   @ApiQuery({
     name: 'handle',

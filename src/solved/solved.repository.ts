@@ -119,6 +119,17 @@ export class SolvedRepository {
       .then((res) => res.data);
   }
 
+  async userProblemStats(handle: string) {
+    const url = `https://solved.ac/api/v3/user/problem_stats`;
+    return await this.httpService.axiosRef
+      .get(url, {
+        params: {
+          handle: handle,
+        },
+      })
+      .then((res) => res.data);
+  }
+
   async userTagRatings(handle: string) {
     const url = `https://solved.ac/api/v3/user/tag_ratings`;
     return await this.httpService.axiosRef

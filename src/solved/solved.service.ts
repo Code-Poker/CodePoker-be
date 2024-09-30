@@ -42,6 +42,10 @@ export class SolvedService {
     return await this.solvedRepository.userTop100(handle);
   }
 
+  async userProblemStats(handle: string) {
+    return await this.solvedRepository.userProblemStats(handle);
+  }
+
   async userTagRatings(handle: string) {
     return await this.solvedRepository.userTagRatings(handle);
   }
