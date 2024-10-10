@@ -108,13 +108,18 @@ export class SolvedController {
     name: 'direction',
     required: false,
   })
+  @ApiQuery({
+    name: 'seed',
+    required: false,
+  })
   searchProblem(
     @Query('query') query: string,
     @Query('page') page: number = 1,
     @Query('sort') sort: string = 'solved',
     @Query('direction') direction: string = 'descending',
+    @Query('seed') seed: string = '',
   ) {
-    return this.solvedService.searchProblem(query, page, sort, direction);
+    return this.solvedService.searchProblem(query, page, sort, direction, seed);
   }
 
   @Get('search/user')
