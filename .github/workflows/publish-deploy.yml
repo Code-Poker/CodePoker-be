@@ -72,7 +72,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             IMAGE_ID=ghcr.io/${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            docker pull $IMAGE_ID:latest
+            docker pull $IMAGE_ID:main
             docker stop codepoker-be
             docker rm codepoker-be
             docker run -d --name codepoker-be \
