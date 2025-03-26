@@ -25,4 +25,5 @@ jobs:
             docker rm codepoker-be
             docker run -d --name codepoker-be \
             -p ${{ secrets.SSH_PORT }}:${{ secrets.SSH_PORT }} \
-            $IMAGE_ID:latest --restart=always
+            --restart=always \
+            $IMAGE_ID:latest 
