@@ -39,6 +39,22 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      # This step creates `.env` fine with the environment variables for the production environment.
+      - name: Generate Environment Variables File for Production
+        run: |
+          echo "PORT=$PORT" >> .env
+          echo "BOJ_AUTO_LOGIN=$BOJ_AUTO_LOGIN" >> .env
+          echo "BOJ_ONLINE_JUDGE=$BOJ_ONLINE_JUDGE" >> .env
+          echo "BOJ_USER_AGENT=$BOJ_USER_AGENT" >> .env
+          echo "MONGODB_URI=$MONGODB_URI" >> .env
+          echo "SOLVEDAC_TOKEN=$SOLVEDAC_TOKEN" >> .env
+        env:
+          PORT: ${{ secrets.ENV_PORT }}
+          BOJ_AUTO_LOGIN: ${{ secrets.ENV_BOJ_AUTO_LOGIN }}
+          BOJ_ONLINE_JUDGE: ${{ secrets.ENV_BOJ_ONLINE_JUDGE }}
+          BOJ_USER_AGENT: ${{ secrets.ENV_BOJ_USER_AGENT }}
+          MONGODB_URI: ${{ secrets.ENV_MONGODB_URI }}
+          SOLVEDAC_TOKEN: ${{ secrets.ENV_SOLVEDAC_TOKEN }}
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
       # It uses the `context` parameter to define the build's context as the set of files located in the specified path. For more information, see [Usage](https://github.com/docker/build-push-action#usage) in the README of the `docker/build-push-action` repository.
       # It uses the `tags` and `labels` parameters to tag and label the image with the output from the "meta" step.
@@ -71,11 +87,14 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            IMAGE_ID=ghcr.io/${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            IMAGE_ID=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            IMAGE_ID=$(echo $IMAGE_ID | tr '[:upper:]' '[:lower:]')
+            CONTAINER_ID=${{ env.IMAGE_NAME }}
+            CONTAINER_ID=$(echo "CONTAINER_ID=Code-Poker/CodePoker-be" | sed -E 's#.*/##' | tr '[:upper:]' '[:lower:]')
             docker pull $IMAGE_ID:main
-            docker stop codepoker-be
-            docker rm codepoker-be
-            docker run -d --name codepoker-be \
-            -p ${{ secrets.SSH_PORT }}:${{ secrets.SSH_PORT }} \
+            docker stop $CONTAINER_ID
+            docker rm $CONTAINER_ID
+            docker run -d --name $CONTAINER_ID \
+            -p 6370:6370 \
             --restart=always \
-            $IMAGE_ID:latest   
+            $IMAGE_ID:main
