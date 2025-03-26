@@ -19,6 +19,10 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd CodePoker-be/
-            git pull
-            npm install
+            IMAGE_ID=ghcr.io/${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            docker pull $IMAGE_ID:latest
+            docker stop codepoker-be
+            docker rm codepoker-be
+            docker run -d --name codepoker-be \
+            -p ${{ secrets.SSH_PORT }}:${{ secrets.SSH_PORT }} \
+            $IMAGE_ID:latest --restart=always
