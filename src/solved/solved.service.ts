@@ -62,8 +62,8 @@ export class SolvedService {
     return await this.solvedRepository.searchSuggestion(query);
   }
 
-  async searchProblem(query: string, page: number, sort: string, direction: string) {
-    return await this.solvedRepository.searchProblem(query, page, sort, direction);
+  async searchProblem(query: string, page: number, sort: string, direction: string, seed: string) {
+    return await this.solvedRepository.searchProblem(query, page, sort, direction, seed);
   }
 
   async searchUser(query: string, page: number) {

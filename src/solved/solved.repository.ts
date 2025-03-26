@@ -174,7 +174,7 @@ export class SolvedRepository {
       .then((res) => res.data);
   }
 
-  async searchProblem(query: string, page: number, sort: string, direction: string) {
+  async searchProblem(query: string, page: number, sort: string, direction: string, seed: string) {
     const url = `https://solved.ac/api/v3/search/problem`;
     return await this.httpService.axiosRef
       .get(url, {
@@ -183,6 +183,7 @@ export class SolvedRepository {
           page: page,
           sort: sort,
           direction: direction,
+          seed: seed,
         },
       })
       .then((res) => res.data);
