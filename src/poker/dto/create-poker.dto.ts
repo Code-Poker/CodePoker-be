@@ -18,11 +18,7 @@ export class CreatePokerDto {
       },
       {
         handle: 'm4ushold',
-        goal: 10000,
-      },
-      {
-        handle: 'qwerty1120',
-        goal: 1120,
+        goal: 925,
       },
     ],
   })
