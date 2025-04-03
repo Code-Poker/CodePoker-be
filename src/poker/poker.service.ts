@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 
 import { GroupRepository } from '../group/group.repository';
 import { ProblemService } from '../problem/problem.service';
@@ -21,19 +22,9 @@ export class PokerService {
     this.groupRepository.validate(createPokerDto.groupId, group);
 
     const poker: Poker = {
-      id: undefined,
+      id: new ObjectId().toString(),
       name,
       participants: [],
-      tasks: createPokerDto.tasks,
-      startTime: new Date(),
-      endTime: createPokerDto.endDate,
-    };
-
-    const res: Poker = {
-      id: undefined,
-      name,
-      participants: [],
-      tasks: createPokerDto.tasks,
       startTime: new Date(),
       endTime: createPokerDto.endDate,
     };
@@ -49,21 +40,8 @@ export class PokerService {
         profileImage,
         snapshot,
         point: 0,
-
         goal,
-        tasksDone: null,
-        result: null,
-      });
-
-      res.participants.push({
-        handle,
-        profileImage,
-        snapshot: [],
-        point: 0,
-
-        goal,
-        tasksDone: null,
-        result: null,
+        result: [],
       });
     }
 
@@ -72,39 +50,38 @@ export class PokerService {
     group.pokers.push(pokerId);
     await this.groupRepository.update(createPokerDto.groupId, group);
 
-    res.id = pokerId;
-    return res;
+    return poker;
   }
 
   async getAll(): Promise<Poker[]> {
-    const pokers = (await this.pokerRepository.getAll()) as Poker[];
-    for (const poker of pokers) {
-      for (const participant in poker.participants) {
-        const { handle, profileImage, goal, point, tasksDone } = poker.participants[participant];
-        poker.participants[participant] = {
-          handle,
-          profileImage,
-          goal,
-          point,
-          tasksDone,
-          snapshot: [],
-          result: [],
-        };
-      }
-    }
+    const pokers = await this.pokerRepository.getAll();
+    // for (const poker of pokers) {
+    //   poker.participants.forEach((participant) => {
+    //     const { handle, profileImage, goal, point } = participant;
+    //     participant = {
+    //       handle,
+    //       profileImage,
+    //       goal,
+    //       point,
+    //       snapshot: [],
+    //       result: [],
+    //     };
+    //   });
+    // }
+
     return pokers;
   }
 
   async get(id: string) {
-    const createdPoker = (await this.pokerRepository.get(id)) as any;
-    for (const participant of createdPoker.participants) {
+    const poker = await this.pokerRepository.get(id);
+    for (const participant of poker.participants) {
       participant.snapshot = [];
     }
-    return createdPoker;
+    return poker;
   }
 
   async refreshRecent() {
-    const pokers = (await this.pokerRepository.getAll()) as Poker[];
+    const pokers = await this.pokerRepository.getAll();
     for (const poker of pokers) {
       if (poker.endTime < new Date()) {
         continue;
@@ -114,14 +91,14 @@ export class PokerService {
   }
 
   async refresh(pokerId: string) {
-    const poker = (await this.pokerRepository.get(pokerId)) as Poker;
+    const poker = await this.pokerRepository.get(pokerId);
     this.pokerRepository.validate(pokerId, poker);
 
     for (const participant of poker.participants) {
       const snapshot = participant.snapshot;
       const present = await this.userService.getProblemsFromBoj(participant.handle);
 
-      const solved = [];
+      const solved: number[] = [];
       for (const problem of present) {
         if (!snapshot.includes(problem)) {
           solved.push(problem);
@@ -129,9 +106,17 @@ export class PokerService {
       }
 
       const solvedProblems = await this.problemService.getProblemsFromSolved(solved);
-      participant.point = solvedProblems.reduce((acc, cur) => acc + this.userService.levelToPoint(cur.level), 0);
+      participant.point = solvedProblems.reduce(
+        (
+          acc,
+          cur: {
+            level: number;
+          },
+        ) => acc + this.userService.levelToPoint(cur.level),
+        0,
+      );
 
-      participant.result = solvedProblems.map((problem) => {
+      participant.result = solvedProblems.map((problem: { problemId: number; titleKo: string; level: number }) => {
         return {
           problemId: problem.problemId,
           titleKo: problem.titleKo,
@@ -146,7 +131,7 @@ export class PokerService {
     this.pokerRepository.update(pokerId, poker);
   }
 
-  async deleteAll() {
+  deleteAll() {
     return this.pokerRepository.deleteAll();
   }
 }

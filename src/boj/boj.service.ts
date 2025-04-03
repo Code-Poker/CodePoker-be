@@ -7,8 +7,8 @@ import { ContestList } from './entities/contest.entity';
 export class BojService {
   constructor(private readonly bojRepository: BojRepository) {}
 
-  async getUserProblems(handle: string, key: string) {
-    return await this.bojRepository.getUserProblems(handle, key);
+  async getUserProblems(handle: string) {
+    return await this.bojRepository.getUserProblems(handle);
   }
 
   async getContests() {
@@ -21,7 +21,11 @@ export class BojService {
         continue;
       }
 
+      if (!contest.url.includes('/')) {
+        continue;
+      }
       const contestId = contest.url.split('/').pop();
+      if (contestId === undefined) continue;
       contest.badge = baechu[contestId]?.badge;
       contest.background = baechu[contestId]?.background;
     }
@@ -33,6 +37,7 @@ export class BojService {
       }
 
       const contestId = contest.url.split('/').pop();
+      if (contestId === undefined) continue;
       contest.badge = baechu[contestId]?.badge;
       contest.background = baechu[contestId]?.background;
     }
@@ -44,6 +49,7 @@ export class BojService {
       }
 
       const contestId = contest.url.split('/').pop();
+      if (contestId === undefined) continue;
       contest.badge = baechu[contestId]?.badge;
       contest.background = baechu[contestId]?.background;
     }
@@ -51,8 +57,8 @@ export class BojService {
     return contests;
   }
 
-  async getSSUInfo() {
-    return await this.bojRepository.getSSUInfo();
+  getSSUInfo() {
+    return this.bojRepository.getSSUInfo();
   }
 
   async getSSURanking(page: number) {

@@ -2,28 +2,32 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 
 import { CreateGroupDto } from './dto/create-group.dto';
-import { IGroup } from './interfaces/group.interface';
+import { Group } from './entities/group.entity';
 
 @Injectable()
 export class GroupRepository {
   constructor(
     @Inject('GROUP_MODEL')
-    private readonly groupModel: Model<IGroup>,
+    private readonly groupModel: Model<Group>,
   ) {}
 
-  create(createGroupDto: CreateGroupDto): Promise<IGroup> {
+  create(createGroupDto: CreateGroupDto): Promise<Group> {
     return this.groupModel.create(createGroupDto);
   }
 
-  getAll(): Promise<IGroup[]> {
+  getAll(): Promise<Group[]> {
     return this.groupModel.find().exec();
   }
 
-  get(groupId: string): Promise<IGroup> {
-    return this.groupModel.findById(groupId);
+  async get(groupId: string): Promise<Group> {
+    const group = await this.groupModel.findById(groupId);
+    if (!group) {
+      throw new NotFoundException(`Group not found: ${groupId}`);
+    }
+    return group;
   }
 
-  validate(groupId: string, group: IGroup): void {
+  validate(groupId: string, group: Group): void {
     if (!group) {
       throw new NotFoundException(`Group not found: ${groupId}`);
     }
@@ -33,7 +37,12 @@ export class GroupRepository {
     return this.groupModel.deleteMany().exec();
   }
 
-  update(groupId: string, group: IGroup): Promise<IGroup> {
-    return this.groupModel.findByIdAndUpdate(groupId, group, { new: true });
+  async update(groupId: string, group: Group): Promise<Group> {
+    const updatedGroup = await this.groupModel.findByIdAndUpdate(groupId, group, { new: true });
+    if (!updatedGroup) {
+      throw new NotFoundException(`Group not found: ${groupId}`);
+    }
+
+    return updatedGroup;
   }
 }

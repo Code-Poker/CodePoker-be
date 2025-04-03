@@ -12,7 +12,7 @@ export class SolvedRepository {
   async getSSUInfo() {
     const url = `https://solved.ac/api/v3/organization/show`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           organizationId: 323,
         },
@@ -24,7 +24,7 @@ export class SolvedRepository {
     const url = `https://solved.ac/api/v3/search/problem`;
     const query = solved === 'true' ? 'o@ssu' : '!o@ssu';
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           query,
           page,
@@ -41,7 +41,7 @@ export class SolvedRepository {
   async getSSUSolvedRanking(page: number) {
     const url = `https://solved.ac/api/v3/ranking/in_organization`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           organizationId: 323,
           page,
@@ -53,7 +53,7 @@ export class SolvedRepository {
   async getSSUAreaRanking(page: number) {
     const url = `https://solved.ac/api/v3/ranking/in_organization`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           organizationId: 323,
           page,
@@ -66,7 +66,7 @@ export class SolvedRepository {
   async userShow(handle: string) {
     const url = `https://solved.ac/api/v3/user/show`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           handle: handle,
         },
@@ -77,7 +77,7 @@ export class SolvedRepository {
   async userOrganizations(handle: string) {
     const url = `https://solved.ac/api/v3/user/organizations`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           handle: handle,
         },
@@ -88,7 +88,7 @@ export class SolvedRepository {
   async userAvailableBadges(handle: string) {
     const url = `https://solved.ac/api/v3/user/available_badges`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           handle: handle,
         },
@@ -99,7 +99,7 @@ export class SolvedRepository {
   async userGrass(handle: string, topic: string) {
     const url = `https://solved.ac/api/v3/user/grass`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           handle: handle,
           topic: topic,
@@ -111,7 +111,7 @@ export class SolvedRepository {
   async userTop100(handle: string) {
     const url = `https://solved.ac/api/v3/user/top_100`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           handle: handle,
         },
@@ -122,7 +122,7 @@ export class SolvedRepository {
   async userProblemStats(handle: string) {
     const url = `https://solved.ac/api/v3/user/problem_stats`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           handle: handle,
         },
@@ -133,7 +133,7 @@ export class SolvedRepository {
   async userTagRatings(handle: string) {
     const url = `https://solved.ac/api/v3/user/tag_ratings`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           handle: handle,
         },
@@ -144,7 +144,7 @@ export class SolvedRepository {
   async backgroundShow(backgroundId: string) {
     const url = `https://solved.ac/api/v3/background/show`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           backgroundId: backgroundId,
         },
@@ -155,7 +155,7 @@ export class SolvedRepository {
   async badgeShow(badgeId: string) {
     const url = `https://solved.ac/api/v3/badge/show`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           badgeId: badgeId,
         },
@@ -166,7 +166,7 @@ export class SolvedRepository {
   async searchSuggestion(query: string) {
     const url = `https://solved.ac/api/v3/search/suggestion`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           query: query,
         },
@@ -177,7 +177,7 @@ export class SolvedRepository {
   async searchProblem(query: string, page: number, sort: string, direction: string, seed: string) {
     const url = `https://solved.ac/api/v3/search/problem`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           query: query,
           page: page,
@@ -192,7 +192,7 @@ export class SolvedRepository {
   async searchUser(query: string, page: number) {
     const url = `https://solved.ac/api/v3/search/user`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           query: query,
           page: page,
@@ -204,7 +204,7 @@ export class SolvedRepository {
   async searchTag(query: string, page: number) {
     const url = `https://solved.ac/api/v3/search/tag`;
     return await this.httpService.axiosRef
-      .get(url, {
+      .get<object>(url, {
         params: {
           query: query,
           page: page,
@@ -215,6 +215,6 @@ export class SolvedRepository {
 
   async siteStats() {
     const url = `https://solved.ac/api/v3/site/stats`;
-    return await this.httpService.axiosRef.get(url).then((res) => res.data);
+    return await this.httpService.axiosRef.get<object>(url).then((res) => res.data);
   }
 }

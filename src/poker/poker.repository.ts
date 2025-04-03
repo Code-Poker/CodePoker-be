@@ -3,25 +3,30 @@ import { Model } from 'mongoose';
 
 import { GroupRepository } from '../group/group.repository';
 import { Poker } from './entities/poker.entity';
-import { IPoker } from './interfaces/poker.interface';
 
 @Injectable()
 export class PokerRepository {
   constructor(
-    @Inject('POKER_MODEL') private readonly pokerModel: Model<IPoker>,
+    @Inject('POKER_MODEL') private readonly pokerModel: Model<Poker>,
     private readonly groupRepository: GroupRepository,
   ) {}
 
-  create(poker: Poker): Promise<IPoker> {
-    return this.pokerModel.create(poker);
+  create(poker: Poker): Promise<Poker> {
+    const createdPoker = new this.pokerModel(poker);
+    return createdPoker.save();
   }
 
-  getAll(): Promise<IPoker[]> {
+  getAll(): Promise<Poker[]> {
     return this.pokerModel.find();
   }
 
-  get(id: string): Promise<IPoker> {
-    return this.pokerModel.findById(id);
+  async get(id: string): Promise<Poker> {
+    const poker = (await this.pokerModel.findById(id)) as Poker;
+    if (!poker) {
+      throw new Error(`Poker not found: ${id.toString()}`);
+    }
+
+    return poker;
   }
 
   validate(id: string, poker: Poker): void {
@@ -39,8 +44,8 @@ export class PokerRepository {
     );
   }
 
-  deleteAll(): void {
-    this.pokerModel.deleteMany({}).exec().then();
+  async deleteAll(): Promise<void> {
+    await this.pokerModel.deleteMany({}).exec().then();
   }
 
   delete(id: string): void {

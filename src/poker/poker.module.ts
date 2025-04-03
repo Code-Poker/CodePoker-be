@@ -13,8 +13,9 @@ import { PokerRepository } from './poker.repository';
 import { PokerService } from './poker.service';
 
 @Module({
-  imports: [DatabaseModule, HttpModule, ScheduleModule.forRoot()],
   controllers: [PokerController],
+  exports: [PokerService],
+  imports: [DatabaseModule, HttpModule, ScheduleModule.forRoot()],
   providers: [
     PokerService,
     UserService,
@@ -24,6 +25,5 @@ import { PokerService } from './poker.service';
     GroupRepository,
     ProblemService,
   ],
-  exports: [PokerService],
 })
 export class PokerModule {}

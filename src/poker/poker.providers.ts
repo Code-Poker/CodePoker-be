@@ -1,6 +1,6 @@
 import { Connection } from 'mongoose';
 
-import { PokerSchema } from './schemas/poker.schema';
+import { PokerSchema } from './entities/poker.entity';
 
 export const pokerProviders = [
   {
