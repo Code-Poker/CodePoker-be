@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsDate, IsMongoId } from 'class-validator';
 
 export class CreatePokerDto {
   @IsMongoId()
   @ApiProperty({
     description: '그룹 ID',
-    example: '66102e3152abeb7ea1ca7a78',
+    example: '661819f47d985318e9aebc39',
   })
   groupId: string;
 
@@ -28,15 +29,10 @@ export class CreatePokerDto {
   }[];
 
   @ApiProperty({
-    required: false,
-    description: '과제 목록',
-    default: [],
-  })
-  tasks: number[];
-
-  @ApiProperty({
     description: '결과 정산 날짜',
     default: new Date(),
   })
+  @IsDate()
+  @Transform(({ value }) => new Date(value))
   endDate: Date;
 }

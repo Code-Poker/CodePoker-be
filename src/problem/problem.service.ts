@@ -16,11 +16,11 @@ export class ProblemService {
 
   async getProblemFromSolved(problemId: string) {
     const url = `https://solved.ac/api/v3/problem/show?problemId=${problemId}`;
-    return await this.httpService.axiosRef.get(url).then((res) => res.data);
+    return await this.httpService.axiosRef.get<object>(url).then((res) => res.data);
   }
 
   async getProblemsFromSolved(problemIds: number[]) {
-    const problems = [];
+    const problems: object[] = [];
 
     for (let page = 1; page <= (problemIds.length + 49) / 50; page++) {
       let url = `https://solved.ac/api/v3/search/problem?query=`;
@@ -28,14 +28,10 @@ export class ProblemService {
         url = url.concat('id:' + problemIds[i] + '|');
       }
 
-      const response = await this.httpService.axiosRef
-        .get(url)
-        .then((res) => res.data)
-        .catch((err) => {
-          throw new Error(err?.message + ': ' + JSON.stringify(err?.response?.data));
-        });
+      const response = await this.httpService.axiosRef.get<object>(url).then((res) => res.data);
 
       for (const problem of response['items']) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         problems.push(problem);
       }
     }

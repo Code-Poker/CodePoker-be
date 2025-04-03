@@ -29,13 +29,13 @@ export class Contest {
     example: '1문제 이상 해결',
     description: '뱃지 획득 조건',
   })
-  badge: string;
+  badge: string | undefined;
 
   @ApiProperty({
     example: '1문제 이상 해결',
     description: '배경 획득 조건',
   })
-  background: string;
+  background: string | undefined;
 
   constructor(
     venue: string,

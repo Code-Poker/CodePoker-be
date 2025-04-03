@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
+import * as Process from 'node:process';
 
 @Injectable()
 export class UserService {
@@ -9,15 +10,12 @@ export class UserService {
   public async getProblemsFromBoj(handle: string) {
     const response = cheerio.load(
       await this.httpService.axiosRef
-        .get(`https://www.acmicpc.net/user/${handle}`, {
+        .get<string>(`https://www.acmicpc.net/user/${handle}`, {
           headers: {
-            'User-Agent': 'Mozilla/5.0',
+            'User-Agent': Process.env.BOJ_USER_AGENT,
           },
         })
-        .then((res) => res.data)
-        .catch((err) => {
-          throw new Error(err?.message + ': ' + JSON.stringify(err?.response?.data));
-        }),
+        .then((res) => res.data),
     );
 
     return response('.col-md-9 > div:nth-child(2) > div:nth-child(2)')
@@ -32,12 +30,10 @@ export class UserService {
 
     return (
       (await this.httpService.axiosRef
-        .get(url)
+        .get<object>(url)
         .then((res) => res.data)
-        .catch((err) => {
-          throw new Error(err?.message + ': ' + JSON.stringify(err?.response?.data));
-        })
-        .then((res) => res['profileImageUrl'])) ?? 'https://static.solved.ac/misc/default_profile.png'
+        .then((res: { profileImageUrl: string }) => res['profileImageUrl'])) ??
+      'https://static.solved.ac/misc/default_profile.png'
     );
   }
 

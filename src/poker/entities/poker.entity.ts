@@ -1,21 +1,22 @@
-import { Problem } from '../../problem/entities/problem.entity';
+import { Prop, SchemaFactory } from '@nestjs/mongoose';
 
-export class Participant {
-  handle: string;
-  profileImage: string;
-  snapshot: number[];
-  point: number;
-
-  goal: number | null;
-  tasksDone: boolean | null;
-  result: Problem[] | null;
-}
+import { Participant } from './participant.entity';
 
 export class Poker {
+  @Prop()
   id: string;
+
+  @Prop()
   name: string;
-  tasks: number[];
+
+  @Prop()
   participants: Participant[];
+
+  @Prop()
   startTime: Date;
+
+  @Prop()
   endTime: Date;
 }
+
+export const PokerSchema = SchemaFactory.createForClass(Poker);

@@ -2,6 +2,8 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as cheerio from 'cheerio';
+import { Cheerio } from 'cheerio';
+import { AnyNode } from 'domhandler';
 import * as process from 'node:process';
 
 import { Contest } from './entities/contest.entity';
@@ -13,12 +15,12 @@ export class BojRepository {
     private readonly httpService: HttpService,
   ) {}
 
-  async getUserProblems(handle: string, key: string) {
+  async getUserProblems(handle: string) {
     const url = `https://www.acmicpc.net/user/${handle}`;
 
     const response = cheerio.load(
       await this.httpService.axiosRef
-        .get(url, {
+        .get<string>(url, {
           headers: {
             'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
@@ -26,14 +28,11 @@ export class BojRepository {
         .then((res) => res.data),
     );
 
-    const problems =
-      key === 'problemId'
-        ? {}
-        : {
-            solved: [],
-            tried: [],
-            extra: [],
-          };
+    const problems: Record<string, number[]> = {
+      solved: [],
+      tried: [],
+      extra: [],
+    };
 
     const panels = response('.panel.panel-default');
     for (let i = 0; i < panels.length; i++) {
@@ -44,18 +43,14 @@ export class BojRepository {
         '시도했지만 맞지 못한 문제': 'tried',
         '맞은 번외 문제': 'extra',
       }[title];
-      if (!panelType) {
+      if (!panelType || !Object.hasOwn(problems, panelType)) {
         continue;
       }
 
       const rows = panels.eq(i).find('.problem-list > a');
       for (let j = 0; j < rows.length; j++) {
-        const problemId = +rows.eq(j).text();
-        if (key === 'problemId') {
-          problems[problemId] = panelType;
-        } else {
-          problems[panelType].push(problemId);
-        }
+        const problemId = parseInt(panels.eq(j).text());
+        problems[panelType].push(problemId);
       }
     }
 
@@ -67,15 +62,16 @@ export class BojRepository {
 
     const response = cheerio.load(
       await this.httpService.axiosRef
-        .get(endedUrl, {
+        .get<string>(endedUrl, {
           headers: {
             'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
         })
+
         .then((res) => res.data),
     );
 
-    const contests = [];
+    const contests: Contest[] = [];
 
     const rows = response(
       'body > div.wrapper > div.container.content > div.row > div:nth-child(2) > div > table > tbody > tr',
@@ -89,9 +85,11 @@ export class BojRepository {
       const name = rows.eq(i).find('td:nth-child(1) > a').text();
       const url = 'https://www.acmicpc.net' + rows.eq(i).find('td:nth-child(1) > a').attr('href');
       const startDate = new Date(
-        1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp'),
+        1000 * parseInt(<string>rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')),
       ).toISOString();
-      const endDate = new Date(1000 * +rows.eq(i).find('td:nth-child(5) > span').attr('data-timestamp')).toISOString();
+      const endDate = new Date(
+        1000 * parseInt(<string>rows.eq(i).find('td:nth-child(5) > span').attr('data-timestamp')),
+      ).toISOString();
 
       contests.push(new Contest(venue, name, url, startDate, endDate));
     }
@@ -122,7 +120,7 @@ export class BojRepository {
 
     const response = cheerio.load(
       await this.httpService.axiosRef
-        .get(bojUrl, {
+        .get<string>(bojUrl, {
           headers: {
             'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
@@ -130,21 +128,27 @@ export class BojRepository {
         .then((res) => res.data),
     );
 
+    const ssuInfo: { bojRank: number; bojUserCount: number; bojSolvedCount: number; bojSubmitCount: number } = {
+      bojRank: 0,
+      bojUserCount: 0,
+      bojSolvedCount: 0,
+      bojSubmitCount: 0,
+    };
+
     const schools = response('#ranklist > tbody > tr');
     const ssu = Array.from(schools).find((school) => {
       return response(school).find('td:nth-child(2) > a').text() === '숭실대학교';
     });
-
     if (!ssu) {
-      return null;
+      return ssuInfo;
     }
 
-    const bojRank = +response(ssu).find('td:nth-child(1)').text();
-    const bojUserCount = +response(ssu).find('td:nth-child(3)').text();
-    const bojSolvedCount = +response(ssu).find('td:nth-child(4)').text();
-    const bojSubmitCount = +response(ssu).find('td:nth-child(5)').text();
+    ssuInfo.bojRank = +response(ssu).find('td:nth-child(1)').text();
+    ssuInfo.bojUserCount = +response(ssu).find('td:nth-child(3)').text();
+    ssuInfo.bojSolvedCount = +response(ssu).find('td:nth-child(4)').text();
+    ssuInfo.bojSubmitCount = +response(ssu).find('td:nth-child(5)').text();
 
-    return { bojRank, bojUserCount, bojSolvedCount, bojSubmitCount };
+    return ssuInfo;
   }
 
   async getSSURanking(page: number) {
@@ -152,7 +156,7 @@ export class BojRepository {
 
     const response = cheerio.load(
       await this.httpService.axiosRef
-        .get(url, {
+        .get<string>(url, {
           headers: {
             'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
@@ -161,7 +165,7 @@ export class BojRepository {
     );
 
     const users = response('#ranklist > tbody > tr');
-    const ranking = [];
+    const ranking: { rank: number; bio: string; handle: string; solved: number; submit: number }[] = [];
 
     for (let rank = 0; rank < 50; rank++) {
       const user = users[page % 2 ? rank : rank + 50];
@@ -181,7 +185,18 @@ export class BojRepository {
   async getBaechu() {
     const url = 'https://raw.githubusercontent.com/kiwiyou/baechu/main/db.json';
 
-    return this.httpService.axiosRef.get(url).then((res) => res.data);
+    const data: Record<string, Record<string, string>> = {};
+    await this.httpService.axiosRef.get<Record<string, { badge: string; background: string }>>(url).then((res) => {
+      for (const contestId in res.data) {
+        const contest: Record<string, string> = res.data[contestId];
+        data[contestId] = {
+          badge: contest.badge,
+          background: contest.background,
+        };
+      }
+    });
+
+    return data;
   }
 
   private async otherResponse() {
@@ -189,7 +204,7 @@ export class BojRepository {
 
     return cheerio.load(
       await this.httpService.axiosRef
-        .get(otherUrl, {
+        .get<string>(otherUrl, {
           headers: {
             'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
             Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
@@ -199,20 +214,24 @@ export class BojRepository {
     );
   }
 
-  private async contestsFromOther(response: any, rowIndex: number): Promise<Contest[]> {
+  private contestsFromOther(response: any, rowIndex: number): Contest[] {
     const contests: Contest[] = [];
 
     const rows = response(
       `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
-    );
+    ) as Cheerio<AnyNode>;
+
     for (let i = 0; i < rows.length; i++) {
-      const venue = rows.eq(i).find('td:nth-child(1)').text();
-      const name = rows.eq(i).find('td:nth-child(2)').text();
-      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href');
+      const venue = rows.eq(i).find('td:nth-child(1)').text().trim();
+      const name = rows.eq(i).find('td:nth-child(2)').text().trim();
+      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href') ?? ''; // `null` 방지
       const startTime = new Date(
-        1000 * +rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp'),
+        1000 * Number(rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp') ?? 0),
       ).toISOString();
-      const endTime = new Date(1000 * +rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')).toISOString();
+      const endTime = new Date(
+        1000 * Number(rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp') ?? 0),
+      ).toISOString();
+
       contests.push(new Contest(venue, name, url, startTime, endTime));
     }
 
