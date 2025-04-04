@@ -3,8 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import * as process from 'node:process';
 
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { configSwagger } from './config.swagger';
-import { HttpExceptionFilter } from './http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

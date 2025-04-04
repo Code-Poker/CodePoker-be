@@ -10,6 +10,17 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@database/*": [
+        "src/database/*"
+      ],
+      "@entities/*": [
+        "src/entities/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
