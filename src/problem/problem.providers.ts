@@ -1,6 +1,6 @@
 import { Connection } from 'mongoose';
 
-import { ProblemSchema } from './schemas/problem.schema';
+import { ProblemSchema } from './entities/problem.entity';
 
 export const problemProviders = [
   {
