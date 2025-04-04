@@ -1,6 +1,6 @@
 import { Connection } from 'mongoose';
 
-import { GroupSchema } from './schemas/group.schema';
+import { GroupSchema } from './entities/group.entity';
 
 export const groupProviders = [
   {
