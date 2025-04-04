@@ -81,20 +81,13 @@ jobs:
     steps:
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          PORT: ${{ secrets.ENV_PORT }}
         with:
           host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
           script: |
-            IMAGE_ID=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            IMAGE_ID=$(echo $IMAGE_ID | tr '[:upper:]' '[:lower:]')
-            CONTAINER_ID=${{ env.IMAGE_NAME }}
-            CONTAINER_ID=$(echo "CONTAINER_ID=Code-Poker/CodePoker-be" | sed -E 's#.*/##' | tr '[:upper:]' '[:lower:]')
-            docker pull $IMAGE_ID:main
-            docker stop $CONTAINER_ID
-            docker rm $CONTAINER_ID
-            docker run -d --name $CONTAINER_ID \
-            -p 6370:6370 \
-            --restart=always \
-            $IMAGE_ID:main
+            docker-compose pull
+            docker-compose up -d

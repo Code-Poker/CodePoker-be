@@ -1,19 +1,18 @@
+import { BojModule } from '@modules/boj/module';
+import { GroupModule } from '@modules/group/module';
+import { PokerModule } from '@modules/poker/module';
+import { SolvedModule } from '@modules/solved/module';
+import { SsuModule } from '@modules/ssu/module';
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { BojModule } from './boj/boj.module';
-import { GroupModule } from './group/group.module';
-import { PokerModule } from './poker/poker.module';
-import { SolvedModule } from './solved/solved.module';
-import { SsuModule } from './ssu/ssu.module';
-
-export const configSwagger = (app: INestApplication<any>) => {
+export const configSwagger = (app: INestApplication) => {
   configCodePoker(app);
   configSSUJoon(app);
   configSolved(app);
 };
 
-const configCodePoker = (app: INestApplication<any>) => {
+const configCodePoker = (app: INestApplication) => {
   const options = new DocumentBuilder()
     .setTitle('코드포커 API')
     .setVersion('1.0')
@@ -28,7 +27,7 @@ const configCodePoker = (app: INestApplication<any>) => {
   SwaggerModule.setup('api', app, document);
 };
 
-const configSSUJoon = (app: INestApplication<any>) => {
+const configSSUJoon = (app: INestApplication) => {
   const options = new DocumentBuilder()
     .setTitle('BaekSSU API')
     .setVersion('1.0')

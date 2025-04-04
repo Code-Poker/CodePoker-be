@@ -1,15 +1,14 @@
+import { DatabaseModule } from '@database/database.module';
+import { BojModule } from '@modules/boj/module';
+import { GroupModule } from '@modules/group/module';
+import { PokerModule } from '@modules/poker/module';
+import { ProblemModule } from '@modules/problem/module';
+import { SolvedModule } from '@modules/solved/module';
+import { SsuModule } from '@modules/ssu/module';
+import { UserModule } from '@modules/user/module';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-
-import { BojModule } from './boj/boj.module';
-import { DatabaseModule } from './database/database.module';
-import { GroupModule } from './group/group.module';
-import { PokerModule } from './poker/poker.module';
-import { ProblemModule } from './problem/problem.module';
-import { SolvedModule } from './solved/solved.module';
-import { SsuModule } from './ssu/ssu.module';
-import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
