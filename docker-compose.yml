@@ -1,0 +1,22 @@
+services:
+  backend:
+    image: ghcr.io/code-poker/codepoker-be:main
+    #    build: .
+    container_name: codepoker-be
+    restart: unless-stopped
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: unless-stopped
+    volumes:
+      - ./mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
