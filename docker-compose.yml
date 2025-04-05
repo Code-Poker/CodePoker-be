@@ -1,6 +1,8 @@
 services:
   backend:
     image: ghcr.io/code-poker/codepoker-be:main
+    env_file:
+      - .env
     #    build: .
     container_name: codepoker-be
     restart: unless-stopped
