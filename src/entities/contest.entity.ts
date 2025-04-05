@@ -53,8 +53,6 @@ export class Contest {
     this.endTime = endTime;
     this.badge = badge;
     this.background = background;
-
-    return this;
   }
 }
 
