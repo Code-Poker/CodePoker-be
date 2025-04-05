@@ -10,13 +10,11 @@ describe('BojRepository', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [HttpModule, ConfigModule.forRoot()],
+      imports: [HttpModule, await ConfigModule.forRoot()],
       providers: [BojRepository],
     }).compile();
 
     repository = module.get<BojRepository>(BojRepository);
-
-    jest.setTimeout(10000);
   });
 
   describe('getUserProblems', () => {
@@ -79,6 +77,6 @@ describe('BojRepository', () => {
         expect(user).toHaveProperty('bio');
         expect(user).toHaveProperty('solved');
       });
-    });
+    }, 10000);
   });
 });
