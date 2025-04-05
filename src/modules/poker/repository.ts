@@ -1,47 +1,49 @@
+import { Participant } from '@entities/participant.entity';
 import { Poker } from '@entities/poker.entity';
+import { CreatePokerDto } from '@modules/poker/dto/create-poker.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 
-import { GroupRepository } from '../group/repository';
-
 @Injectable()
 export class PokerRepository {
-  constructor(
-    @Inject('POKER_MODEL') private readonly pokerModel: Model<Poker>,
-    private readonly groupRepository: GroupRepository,
-  ) {}
+  constructor(@Inject('POKER_MODEL') private readonly pokerModel: Model<Poker>) {}
 
-  create(poker: Poker): Promise<Poker> {
-    const createdPoker = new this.pokerModel(poker);
-    return createdPoker.save();
+  async create(createPokerDto: CreatePokerDto, participants: Participant[]): Promise<Poker> {
+    const pokerDoc = new this.pokerModel({
+      name: createPokerDto.name,
+      participants: participants,
+      startTime: new Date(),
+      endTime: createPokerDto.endDate,
+    });
+
+    return Poker.fromDocument(await pokerDoc.save());
   }
 
-  getAll(): Promise<Poker[]> {
-    return this.pokerModel.find();
+  async getAll(): Promise<Poker[]> {
+    const pokerDocs = await this.pokerModel.find().exec();
+    if (!pokerDocs) {
+      throw new Error('No pokers found');
+    }
+
+    return pokerDocs.map((document) => Poker.fromDocument(document));
   }
 
   async get(id: string): Promise<Poker> {
-    const poker = (await this.pokerModel.findById(id)) as Poker;
-    if (!poker) {
+    const pokerDoc = await this.pokerModel.findById(id);
+    if (!pokerDoc) {
       throw new Error(`Poker not found: ${id.toString()}`);
     }
 
-    return poker;
+    return Poker.fromDocument(pokerDoc);
   }
 
-  validate(id: string, poker: Poker): void {
-    if (!poker) {
+  async update(id: string, poker: Poker): Promise<Poker> {
+    const pokerDoc = await this.pokerModel.findByIdAndUpdate(id, poker);
+    if (!pokerDoc) {
       throw new Error(`Poker not found: ${id}`);
     }
-  }
 
-  update(id: string, poker: Poker): void {
-    this.pokerModel.updateOne(
-      {
-        _id: id,
-      },
-      poker,
-    );
+    return Poker.fromDocument(pokerDoc);
   }
 
   async deleteAll(): Promise<void> {

@@ -1,8 +1,8 @@
+import { Participant } from '@entities/participant.entity';
 import { Poker } from '@entities/poker.entity';
+import { GroupRepository } from '@modules/group/repository';
 import { Injectable } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
 
-import { GroupRepository } from '../group/repository';
 import { ProblemService } from '../problem/service';
 import { UserService } from '../user/service';
 import { CreatePokerDto } from './dto/create-poker.dto';
@@ -17,25 +17,17 @@ export class PokerService {
     private readonly groupRepository: GroupRepository,
   ) {}
 
-  async create(name: string, createPokerDto: CreatePokerDto): Promise<Poker> {
+  async create(createPokerDto: CreatePokerDto): Promise<Poker> {
     const group = await this.groupRepository.get(createPokerDto.groupId);
-    this.groupRepository.validate(createPokerDto.groupId, group);
 
-    const poker: Poker = {
-      id: new ObjectId().toString(),
-      name,
-      participants: [],
-      startTime: new Date(),
-      endTime: createPokerDto.endDate,
-    };
-
+    const participants: Participant[] = [];
     for (const participant of createPokerDto.participants) {
       const handle = participant.handle;
       const goal = participant.goal;
       const profileImage = await this.userService.getProfileImageFromSolved(handle);
 
       const snapshot = await this.userService.getProblemsFromBoj(handle);
-      poker.participants.push({
+      participants.push({
         handle,
         profileImage,
         snapshot,
@@ -45,12 +37,12 @@ export class PokerService {
       });
     }
 
-    const createdPoker = await this.pokerRepository.create(poker);
-    const pokerId = createdPoker.id;
-    group.pokers.push(pokerId);
+    const createdPoker = await this.pokerRepository.create(createPokerDto, participants);
+
+    group.pokers.push(createdPoker.id);
     await this.groupRepository.update(createPokerDto.groupId, group);
 
-    return poker;
+    return createdPoker;
   }
 
   async getAll(): Promise<Poker[]> {
@@ -92,7 +84,6 @@ export class PokerService {
 
   async refresh(pokerId: string) {
     const poker = await this.pokerRepository.get(pokerId);
-    this.pokerRepository.validate(pokerId, poker);
 
     for (const participant of poker.participants) {
       const snapshot = participant.snapshot;

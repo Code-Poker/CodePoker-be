@@ -40,7 +40,8 @@ export class ProblemService {
         .then((res) => res.data);
 
       for (const problem of response['items']) {
-        problems.push(new Problem(problem));
+        const { problemId, titleKo, level } = problem;
+        problems.push(new Problem(problemId, titleKo, level));
       }
     }
 

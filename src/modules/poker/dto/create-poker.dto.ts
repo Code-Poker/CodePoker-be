@@ -11,6 +11,12 @@ export class CreatePokerDto {
   groupId: string;
 
   @ApiProperty({
+    description: '포커 이름',
+    default: 'SCCC 포커',
+  })
+  name: string;
+
+  @ApiProperty({
     description: '게임에 참여하는 사람들의 목록',
     default: [
       {

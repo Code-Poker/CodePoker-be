@@ -1,12 +1,15 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 
 import { Participant } from './participant.entity';
 
+export type PokerDocument = HydratedDocument<Poker>;
+
+@Schema()
 export class Poker {
-  @Prop()
   id: string;
 
-  @Prop()
+  @Prop({ required: true })
   name: string;
 
   @Prop()
@@ -15,8 +18,26 @@ export class Poker {
   @Prop()
   startTime: Date;
 
-  @Prop()
+  @Prop({ required: true })
   endTime: Date;
+
+  constructor(id: string, name: string, participants: Participant[], startTime: Date, endTime: Date) {
+    this.id = id;
+    this.name = name;
+    this.participants = participants;
+    this.startTime = startTime;
+    this.endTime = endTime;
+  }
+
+  static fromDocument(pokerDocument: PokerDocument): Poker {
+    return new Poker(
+      pokerDocument._id.toString(),
+      pokerDocument.name,
+      pokerDocument.participants,
+      pokerDocument.startTime,
+      pokerDocument.endTime,
+    );
+  }
 }
 
 export const PokerSchema = SchemaFactory.createForClass(Poker);

@@ -11,26 +11,26 @@ export class GroupRepository {
     private readonly groupModel: Model<Group>,
   ) {}
 
-  create(createGroupDto: CreateGroupDto): Promise<Group> {
-    return this.groupModel.create(createGroupDto);
+  async create(createGroupDto: CreateGroupDto): Promise<Group> {
+    return Group.fromDocument(await this.groupModel.create(createGroupDto));
   }
 
-  getAll(): Promise<Group[]> {
-    return this.groupModel.find().exec();
+  async getAll(): Promise<Group[]> {
+    const groupDocs = await this.groupModel.find().exec();
+    if (!groupDocs) {
+      throw new NotFoundException('No groups found');
+    }
+
+    return groupDocs.map((document) => Group.fromDocument(document));
   }
 
   async get(groupId: string): Promise<Group> {
-    const group = await this.groupModel.findById(groupId);
-    if (!group) {
+    const groupDoc = await this.groupModel.findById(groupId);
+    if (!groupDoc) {
       throw new NotFoundException(`Group not found: ${groupId}`);
     }
-    return group;
-  }
 
-  validate(groupId: string, group: Group): void {
-    if (!group) {
-      throw new NotFoundException(`Group not found: ${groupId}`);
-    }
+    return Group.fromDocument(groupDoc);
   }
 
   deleteAll() {
@@ -43,6 +43,6 @@ export class GroupRepository {
       throw new NotFoundException(`Group not found: ${groupId}`);
     }
 
-    return updatedGroup;
+    return Group.fromDocument(updatedGroup);
   }
 }
