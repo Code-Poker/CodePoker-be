@@ -18,6 +18,8 @@ export class PokerService {
   ) {}
 
   async create(createPokerDto: CreatePokerDto): Promise<Poker> {
+    const group = await this.groupRepository.get(createPokerDto.groupId);
+
     const participants: Participant[] = [];
     for (const participant of createPokerDto.participants) {
       const handle = participant.handle;
@@ -35,9 +37,8 @@ export class PokerService {
       });
     }
 
-    const createdPoker: Poker = await this.pokerRepository.create(createPokerDto, participants);
+    const createdPoker = await this.pokerRepository.create(createPokerDto, participants);
 
-    const group = await this.groupRepository.get(createPokerDto.groupId);
     group.pokers.push(createdPoker.id);
     await this.groupRepository.update(createPokerDto.groupId, group);
 
