@@ -14,18 +14,19 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      PORT: ${{ secrets.PORT }}
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}
-      SOLVEDAC_TOKEN: ${{ secrets.SOLVEDAC_TOKEN }}
-      BOJ_AUTO_LOGIN: ${{ secrets.BOJ_AUTO_LOGIN }}
-      BOJ_USER_AGENT: ${{ secrets.BOJ_USER_AGENT }}
-      CLIST_API_KEY: ${{ secrets.CLIST_API_KEY }}
-
     strategy:
       matrix:
         node-version: [ 23.x ]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    env:
+      PORT: ${{ secrets.PORT }}
+      BOJ_AUTO_LOGIN: ${{ secrets.BOJ_AUTO_LOGIN }}
+      BOJ_ONLINE_JUDGE: ${{ secrets.BOJ_ONLINE_JUDGE }}
+      BOJ_USER_AGENT: ${{ secrets.BOJ_USER_AGENT }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      SOLVEDAC_TOKEN: ${{ secrets.SOLVEDAC_TOKEN }}
+      CLIST_API_KEY: ${{ secrets.CLIST_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -36,14 +37,13 @@ jobs:
           cache: 'npm'
       - name: Generate Environment Variables File for Production
         run: |
-          cat <<EOF > .env
-          PORT="${PORT}"
-          MONGODB_URI="${MONGODB_URI}"
-          SOLVEDAC_TOKEN="${SOLVEDAC_TOKEN}"
-          BOJ_AUTO_LOGIN="${BOJ_AUTO_LOGIN}"
-          BOJ_USER_AGENT="${BOJ_USER_AGENT}"
-          CLIST_API_KEY="${CLIST_API_KEY}"
-          EOF
+          echo "PORT=$PORT" >> .env
+          echo "BOJ_AUTO_LOGIN=$BOJ_AUTO_LOGIN" >> .env
+          echo "BOJ_ONLINE_JUDGE=$BOJ_ONLINE_JUDGE" >> .env
+          echo "BOJ_USER_AGENT=$BOJ_USER_AGENT" >> .env
+          echo "MONGODB_URI=$MONGODB_URI" >> .env
+          echo "SOLVEDAC_TOKEN=$SOLVEDAC_TOKEN" >> .env
+          echo "CLIST_API_KEY=$CLIST_API_KEY" >> .env
 
       - run: npm ci
       - run: npm run build --if-present
