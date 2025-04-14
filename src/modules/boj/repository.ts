@@ -1,10 +1,8 @@
-import { Contest } from '@entities/contest.entity';
+import { Contest, ContestList } from '@entities/contest.entity';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as cheerio from 'cheerio';
-import { Cheerio } from 'cheerio';
-import { AnyNode } from 'domhandler';
 import * as process from 'node:process';
 
 @Injectable()
@@ -56,62 +54,94 @@ export class BojRepository {
     return problems;
   }
 
-  async getEndedContests(): Promise<Contest[]> {
-    const endedUrl = 'https://www.acmicpc.net/contest/official/list';
+  async getContestsFromBoj(): Promise<ContestList> {
+    const url = 'https://www.acmicpc.net/contest/official/list';
 
     const response = cheerio.load(
       await this.httpService.axiosRef
-        .get<string>(endedUrl, {
+        .get<string>(url, {
           headers: {
             'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
           },
         })
-
         .then((res) => res.data),
     );
 
-    const contests: Contest[] = [];
+    const contests: ContestList = new ContestList();
 
     const rows = response(
       'body > div.wrapper > div.container.content > div.row > div:nth-child(2) > div > table > tbody > tr',
     );
     for (let i = 0; i < rows.length; i++) {
-      if (rows.eq(i).find('td:nth-child(6)').text() !== '종료') {
-        continue;
-      }
-
       const venue = 'BOJ Open';
       const name = rows.eq(i).find('td:nth-child(1) > a').text();
       const url = 'https://www.acmicpc.net' + rows.eq(i).find('td:nth-child(1) > a').attr('href');
       const startDate = new Date(
         1000 * parseInt(<string>rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp')),
-      ).toISOString();
+      );
       const endDate = new Date(
         1000 * parseInt(<string>rows.eq(i).find('td:nth-child(5) > span').attr('data-timestamp')),
-      ).toISOString();
+      );
 
-      contests.push(new Contest(venue, name, url, startDate, endDate));
+      const contest = new Contest(venue, name, url, startDate, endDate);
+      if (endDate < new Date()) {
+        contests.ended.push(contest);
+      } else if (new Date() < startDate) {
+        contests.upcoming.push(contest);
+      } else {
+        contests.ongoing.push(contest);
+      }
     }
 
     return contests;
   }
 
-  async getOngoingContests(): Promise<Contest[]> {
-    const response = await this.otherResponse();
+  async getContestsFromCList(): Promise<ContestList> {
+    const url = 'https://clist.by/api/v4/contest/';
+    const headers = {
+      Authorization: `${process.env.CLIST_API_KEY}`,
+    };
+    const params = {
+      resource_id__in: '1, 25, 86, 141, 93, 102',
+      order_by: '-start',
+    };
 
-    if (response('.col-md-12').length < 6) {
-      return [];
+    const response = await this.httpService.axiosRef.get<{
+      objects: {
+        event: string;
+        start: string;
+        end: string;
+        href: string;
+        resource_id: number;
+      }[];
+    }>(url, {
+      headers: headers,
+      params: params,
+    });
+
+    const clist: {
+      event: string;
+      start: string;
+      end: string;
+      href: string;
+      resource_id: number;
+    }[] = response.data.objects;
+
+    const contests: ContestList = new ContestList();
+    for (const contest of clist) {
+      const startDate = new Date(contest.start);
+      const endDate = new Date(contest.end);
+
+      if (endDate < new Date()) {
+        contests.ended.push(Contest.fromCList(contest));
+      } else if (new Date() < startDate) {
+        contests.upcoming.push(Contest.fromCList(contest));
+      } else {
+        contests.ongoing.push(Contest.fromCList(contest));
+      }
     }
 
-    return this.contestsFromOther(response, 3);
-  }
-
-  async getUpcomingContests(): Promise<Contest[]> {
-    const response = await this.otherResponse();
-
-    const rowIndex = response('.col-md-12').length === 6 ? 5 : 3;
-
-    return this.contestsFromOther(response, rowIndex);
+    return contests;
   }
 
   async getSSUInfo() {
@@ -181,10 +211,10 @@ export class BojRepository {
     return ranking;
   }
 
-  async getBaechu() {
+  async getBaechu(): Promise<Record<string, { badge: string; background: string }>> {
     const url = 'https://raw.githubusercontent.com/kiwiyou/baechu/main/db.json';
 
-    const data: Record<string, Record<string, string>> = {};
+    const data: Record<string, { badge: string; background: string }> = {};
     await this.httpService.axiosRef.get<Record<string, { badge: string; background: string }>>(url).then((res) => {
       for (const contestId in res.data) {
         const contest: Record<string, string> = res.data[contestId];
@@ -196,44 +226,5 @@ export class BojRepository {
     });
 
     return data;
-  }
-
-  private async otherResponse() {
-    const otherUrl = 'https://www.acmicpc.net/contest/other/list';
-
-    return cheerio.load(
-      await this.httpService.axiosRef
-        .get<string>(otherUrl, {
-          headers: {
-            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
-            Cookie: 'bojautologin=' + process.env.BOJ_AUTO_LOGIN + ';',
-          },
-        })
-        .then((res) => res.data),
-    );
-  }
-
-  private contestsFromOther(response: any, rowIndex: number): Contest[] {
-    const contests: Contest[] = [];
-
-    const rows = response(
-      `body > div.wrapper > div.container.content > div.row > div:nth-child(${rowIndex}) > div > table > tbody > tr`,
-    ) as Cheerio<AnyNode>;
-
-    for (let i = 0; i < rows.length; i++) {
-      const venue = rows.eq(i).find('td:nth-child(1)').text().trim();
-      const name = rows.eq(i).find('td:nth-child(2)').text().trim();
-      const url = rows.eq(i).find('td:nth-child(2) > a').attr('href') ?? ''; // `null` 방지
-      const startTime = new Date(
-        1000 * Number(rows.eq(i).find('td:nth-child(3) > span').attr('data-timestamp') ?? 0),
-      ).toISOString();
-      const endTime = new Date(
-        1000 * Number(rows.eq(i).find('td:nth-child(4) > span').attr('data-timestamp') ?? 0),
-      ).toISOString();
-
-      contests.push(new Contest(venue, name, url, startTime, endTime));
-    }
-
-    return contests;
   }
 }
