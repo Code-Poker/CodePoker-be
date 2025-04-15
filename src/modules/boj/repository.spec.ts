@@ -1,4 +1,3 @@
-import { Contest } from '@entities/contest.entity';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -17,6 +16,30 @@ describe('BojRepository', () => {
     repository = module.get<BojRepository>(BojRepository);
   });
 
+  describe('Get BOJ contests', () => {
+    it('should return ContestList', async () => {
+      const contests = await repository.getContestsFromBoj();
+      expect(contests).toHaveProperty('ended');
+      expect(contests.ended).toBeInstanceOf(Array);
+      expect(contests).toHaveProperty('upcoming');
+      expect(contests.upcoming).toBeInstanceOf(Array);
+      expect(contests).toHaveProperty('ongoing');
+      expect(contests.ongoing).toBeInstanceOf(Array);
+    }, 10000);
+  });
+
+  describe('Get CList contests', () => {
+    it('should return ContestList', async () => {
+      const contests = await repository.getContestsFromCList();
+      expect(contests).toHaveProperty('ended');
+      expect(contests.ended).toBeInstanceOf(Array);
+      expect(contests).toHaveProperty('upcoming');
+      expect(contests.upcoming).toBeInstanceOf(Array);
+      expect(contests).toHaveProperty('ongoing');
+      expect(contests.ongoing).toBeInstanceOf(Array);
+    }, 10000);
+  });
+
   describe('getUserProblems', () => {
     it('should return problems', async () => {
       const problems = await repository.getUserProblems('w8385');
@@ -26,36 +49,6 @@ describe('BojRepository', () => {
       expect(problems.tried).toBeInstanceOf(Array);
       expect(problems).toHaveProperty('extra');
       expect(problems.extra).toBeInstanceOf(Array);
-    });
-  });
-
-  describe('getEndedContests', () => {
-    it('should return contests', async () => {
-      const contests = await repository.getEndedContests();
-      expect(contests).toBeInstanceOf(Array<Contest>);
-      contests.forEach((contest) => {
-        expect(contest).toBeInstanceOf(Contest);
-      });
-    });
-  });
-
-  describe('getOngoingContests', () => {
-    it('should return contests', async () => {
-      const contests = await repository.getOngoingContests();
-      expect(contests).toBeInstanceOf(Array<Contest>);
-      contests.forEach((contest) => {
-        expect(contest).toBeInstanceOf(Contest);
-      });
-    });
-  });
-
-  describe('getUpcomingContests', () => {
-    it('should return contests', async () => {
-      const contests = await repository.getUpcomingContests();
-      expect(contests).toBeInstanceOf(Array<Contest>);
-      contests.forEach((contest) => {
-        expect(contest).toBeInstanceOf(Contest);
-      });
     });
   });
 

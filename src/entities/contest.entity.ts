@@ -41,23 +41,42 @@ export class Contest {
     venue: string,
     name: string,
     url: string,
-    startTime: string,
-    endTime: string,
+    startTime: Date,
+    endTime: Date,
     badge?: string,
     background?: string,
   ) {
     this.venue = venue;
     this.name = name;
     this.url = url;
-    this.startTime = startTime;
-    this.endTime = endTime;
+    this.startTime = startTime.toISOString();
+    this.endTime = endTime.toISOString();
     this.badge = badge;
     this.background = background;
   }
+
+  static fromCList(data: { event: string; start: string; end: string; href: string; resource_id: number }) {
+    return new Contest(
+      clistMap[data.resource_id] ?? 'Unknown',
+      data.event,
+      data.href,
+      new Date(data.start + '.000Z'),
+      new Date(data.end + '.000Z'),
+    );
+  }
 }
 
+const clistMap: Record<number, string> = {
+  1: 'Codeforces',
+  25: 'USACO',
+  86: 'ICPC',
+  141: 'ICPC',
+  93: 'AtCoder',
+  102: 'LeetCode',
+};
+
 export class ContestList {
-  ended: Contest[];
-  ongoing: Contest[];
-  upcoming: Contest[];
+  ended: Contest[] = [];
+  ongoing: Contest[] = [];
+  upcoming: Contest[] = [];
 }
