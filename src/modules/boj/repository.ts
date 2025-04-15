@@ -1,16 +1,13 @@
 import { Contest, ContestList } from '@entities/contest.entity';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as cheerio from 'cheerio';
 import * as process from 'node:process';
+import * as Process from 'node:process';
 
 @Injectable()
 export class BojRepository {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
   async getUserProblems(handle: string) {
     const url = `https://www.acmicpc.net/user/${handle}`;
@@ -19,7 +16,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get<string>(url, {
           headers: {
-            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
+            'User-Agent': Process.env.BOJ_USER_AGENT,
           },
         })
         .then((res) => res.data),
@@ -61,7 +58,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get<string>(url, {
           headers: {
-            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
+            'User-Agent': Process.env.BOJ_USER_AGENT,
           },
         })
         .then((res) => res.data),
@@ -151,7 +148,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get<string>(bojUrl, {
           headers: {
-            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
+            'User-Agent': Process.env.BOJ_USER_AGENT,
           },
         })
         .then((res) => res.data),
@@ -187,7 +184,7 @@ export class BojRepository {
       await this.httpService.axiosRef
         .get<string>(url, {
           headers: {
-            'User-Agent': this.configService.get<string>('BOJ_USER_AGENT'),
+            'User-Agent': Process.env.BOJ_USER_AGENT,
           },
         })
         .then((res) => res.data),
